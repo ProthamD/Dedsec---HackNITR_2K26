@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Inventory - Inventree</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8 text-white">
+            <h1 class="text-5xl font-extrabold mb-3 drop-shadow-2xl">📦 Add Inventory</h1>
+            <p class="text-lg opacity-90">Add new products to your inventory system</p>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
+            <form action="/inventory/add" method="POST" class="space-y-6">
+                <!-- Basic Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">📋</span> Basic Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">SKU *</label>
+                            <input type="text" name="sku" required 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., SKU-001">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
+                            <input type="text" name="name" required 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., Wireless Earbuds">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                            <input type="text" name="location" value="Main-Warehouse"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., Main-Warehouse">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Horizon Days</label>
+                            <input type="number" name="horizonDays" value="21"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="21">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">📊</span> Stock Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">On Hand *</label>
+                            <input type="number" name="onHand" required value="0"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Inbound Units</label>
+                            <input type="number" name="inboundUnits" value="0"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Safety Stock Days</label>
+                            <input type="number" name="safetyStockDays" value="3"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supplier & Ordering -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">🚚</span> Supplier & Ordering
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Lead Time (Days) *</label>
+                            <input type="number" name="leadTimeDays" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 7">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">MOQ (Minimum Order Quantity) *</label>
+                            <input type="number" name="moq" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 50">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">💰</span> Cost Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Unit Cost ($) *</label>
+                            <input type="number" step="0.01" name="unitCost" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 25.50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Budget Cap ($) *</label>
+                            <input type="number" step="0.01" name="budgetCap" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 5000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Holding Cost Per Unit ($) *</label>
+                            <input type="text" name="holdingCostPerUnit" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 0.50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Stockout Cost Per Unit ($) *</label>
+                            <input type="text" name="stockoutCostPerUnit" required
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="e.g., 10.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forecasting -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">📈</span> Forecasting
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Seasonality Hint</label>
+                            <select name="seasonalityHint"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all">
+                                <option value="Stable">Stable</option>
+                                <option value="Seasonal">Seasonal</option>
+                                <option value="Trending Up">Trending Up</option>
+                                <option value="Trending Down">Trending Down</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Seasonality Multiplier</label>
+                            <input type="number" step="0.1" name="seasonalityMultiplier" value="1"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="1.0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Target Service Level</label>
+                            <input type="number" step="0.01" name="targetServiceLevel" value="0.95"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                                placeholder="0.95">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demand History (Optional) -->
+                <div class="pb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="text-3xl">📉</span> Demand History (Optional)
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">Add historical demand data as comma-separated values (e.g., 10,15,12,20)</p>
+                    <textarea name="demandHistory" rows="3"
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
+                        placeholder="e.g., 10,15,12,20,18,22,19,17,21,16,14,23,25,20,18,19,21,22,20,18,17"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-6">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95">
+                        ✅ Add Product
+                    </button>
+                    <a href="/"
+                        class="flex-1 bg-gray-200 text-gray-700 px-8 py-4 rounded-full font-bold hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-center">
+                        ❌ Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
