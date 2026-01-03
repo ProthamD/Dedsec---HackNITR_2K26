@@ -5,33 +5,46 @@ import { inventreeTool } from '../tools/inventree-tool';
 import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
-const InventoryDecisionSchema = z.object({
+export const InventoryDecisionSchema = z.object({
   sku: z.string(),
   productName: z.string(),
   action: z.enum(["RESTOCK_URGENT", "RESTOCK_NORMAL", "HOLD", "DISCOUNT_TO_CLEAR"]),
   recommendedQuantity: z.number(),
-  reasoning: z.string().describe("Human-like explanation of why this action was taken"),
-  whyNot: z.string().describe("Explanation of why alternative actions were rejected"),
+  reasoning: z.string().describe("Explanation of why this action was taken based on data"),
+  whyNot: z.string().describe("Explanation of why other actions were rejected"),
   riskScore: z.number().min(1).max(10),
+  sustainabilityRating: z.enum(["Green", "Neutral", "High-Carbon"]).describe("Environmental impact of the decision"),
 });
 
 export const inventoryAgent = new Agent({
   name: 'Inventory Manager Agent',
   instructions: `
-    You are an expert Inventory Operations Manager. 
-    Your goal is to optimize stock levels based on demand, budget, and storage constraints.
-    
-    When a user provides inventory data:
-    1. Analyze the 7-day sales trend.
-    2. Check if the current stock lasts at least 5 days.
-    3. Make a decision: RESTOCK, DELAY, or REALLOCATE.
-    4. EXPLAIN YOUR REASONING: Why did you pick this action? 
-    5. WHY NOT: Why did you reject the other two actions? (e.g., "Rejected Restock because budget is over limit").
-    
-    Use the inventreeTool to fetch inventory snapshots and the scorers to evaluate decisions.
-    Return concise, structured JSON where appropriate.
+    You are a Senior Strategic Operations Manager for a high-growth Smart Retail brand (D2C Electronics & Fashion). 
+Your goal is to optimize inventory using "Decision Intelligence"—balancing profitability, customer satisfaction, and sustainability.
+
+### CORE LOGIC STEPS:
+1. DATA ANALYSIS: 
+   - Calculate 'Daily Velocity' from demandHistory.
+   - Calculate 'Days of Cover' (onHand / Daily Velocity).
+   
+2. GENERALIZED SEASONALITY & TRENDS:
+   - Identify if current sales are the best predictor. If "seasonalityHint" or "market_signal" is present, they OVERRIDE historical data.
+   - For Fashion: Focus on weather/season (e.g., Woollens in Winter).
+   - For Electronics: Focus on product lifecycles (e.g., New Model Launch = High demand; Old Model = Liquidate).
+   - Multiplier Rule: PredictedDemand = (DailyVelocity * horizonDays) * seasonalityMultiplier.
+
+3. SUSTAINABILITY & LOGISTICS:
+   - "The Green Constraint": Prefer slower, consolidated shipping (Sea/Ground) to minimize CO2.
+   - Only trigger "Emergency Air Freight" (High Carbon) if stockoutRisk > 80% and the product is "High Margin".
+   - Explain the carbon trade-off in your reasoning.
+
+4. FINANCIAL CONSTRAINTS:
+   - Respect budgetCap per SKU. If budget is exceeded, prioritize SKUs with the highest 'stockoutCostPerUnit'.
+   - Respect MOQ. If recommended quantity < MOQ, either order 0 or bump up to MOQ based on risk.
+
+Always use the 'inventreeTool' to fetch the latest data for the requested SKU.
   `,
-  model: 'google/gemini-2.0-flash',
+  model: 'mistral/codestral-latest',
   tools: { inventreeTool },
   scorers: {
     decisionAppropriateness: {

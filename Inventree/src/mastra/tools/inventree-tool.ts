@@ -1,6 +1,8 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import inventoryData from '../../data/inventory.json';
+import * as fs from 'fs/promises';
+import path from 'path';
 
 const inventoryInputSchema = z.object({
   sku: z.string().describe('SKU identifier'),
@@ -38,6 +40,13 @@ export const inventoryOutputSchema = z.object({
   seasonalityMultiplier: z.number(),
 });
 
+// Export this so the API route can use it without the Agent
+export const fetchInventoryData = async () => {
+  const dataPath = path.resolve(process.cwd(), 'src/data/inventory.json');
+  const fileContent = await fs.readFile(dataPath, 'utf-8');
+  return JSON.parse(fileContent);
+};
+
 type InventorySnapshot = z.infer<typeof inventoryOutputSchema>;
 
 const buildSnapshot = (
@@ -69,18 +78,14 @@ const buildSnapshot = (
   };
 };
 
-export const getInventorySnapshot = (
-  input: z.infer<typeof inventoryInputSchema>,
-): InventorySnapshot => {
-  return buildSnapshot(input.sku, input.location, input.horizonDays);
-};
-
 export const inventreeTool = createTool({
   id: 'get-inventory-snapshot',
   description: 'Get inventory snapshot, demand history, and constraints for a SKU',
   inputSchema: inventoryInputSchema,
   outputSchema: inventoryOutputSchema,
   execute: async ({ context }) => {
-    return getInventorySnapshot(context);
+    return buildSnapshot(context.sku, context.location, context.horizonDays);
   },
 });
+
+

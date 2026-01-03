@@ -2,13 +2,11 @@
 import { Mastra } from '@mastra/core/mastra';
 import { PinoLogger } from '@mastra/loggers';
 import { LibSQLStore } from '@mastra/libsql';
-import { weatherWorkflow } from './workflows/weather-workflow';
-import { weatherAgent } from './agents/weather-agent';
 import { inventoryAgent } from './agents/inventree-agent';
 import { toolCallAppropriatenessScorer, completenessScorer, translationScorer } from './scorers/weather-scorer';
+import { fetchInventoryData } from "./tools/inventree-tool";
 
 export const mastra = new Mastra({
-  workflows: { weatherWorkflow },
   agents: { inventoryAgent },
   scorers: { toolCallAppropriatenessScorer, completenessScorer, translationScorer },
   storage: new LibSQLStore({
@@ -28,3 +26,4 @@ export const mastra = new Mastra({
     default: { enabled: true }, 
   },
 });
+
