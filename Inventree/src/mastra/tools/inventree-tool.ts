@@ -4,8 +4,14 @@ import inventoryData from '../../data/inventory.json';
 
 const inventoryInputSchema = z.object({
   sku: z.string().describe('SKU identifier'),
-  location: z.string().default('default').describe('Inventory location or warehouse'),
-  horizonDays: z.number().int().default(30).describe('Planning horizon in days'),
+  location: z.string().default('Main-Warehouse').describe('Inventory location or warehouse'),
+  horizonDays: z.union([z.string(), z.number()]).transform(val => {
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    if (isNaN(num) || num < 7 || num > 90) {
+      throw new Error('Planning horizon must be between 7 and 90 days');
+    }
+    return num;
+  }).default(30).describe('Planning horizon in days (between 7 and 90)'),
 });
 
 export const inventoryOutputSchema = z.object({
@@ -59,6 +65,7 @@ const buildSnapshot = (
     stockoutCostPerUnit: typeof item.stockoutCostPerUnit === 'string' 
       ? parseFloat(item.stockoutCostPerUnit) 
       : item.stockoutCostPerUnit,
+    demandHistory: item.demandHistory.slice(-horizonDays),
   };
 };
 
