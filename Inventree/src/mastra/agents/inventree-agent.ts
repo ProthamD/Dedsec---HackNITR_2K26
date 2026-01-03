@@ -1,5 +1,8 @@
 import { Agent } from "@mastra/core/agent";
-import { google } from "@ai-sdk/google";
+import { Memory } from '@mastra/memory';
+import { LibSQLStore } from '@mastra/libsql';
+import { inventreeTool } from '../tools/inventree-tool';
+import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
 const InventoryDecisionSchema = z.object({
@@ -13,7 +16,7 @@ const InventoryDecisionSchema = z.object({
 });
 
 export const inventoryAgent = new Agent({
-  name: "Inventory Manager Agent",
+  name: 'Inventory Manager Agent',
   instructions: `
     You are an expert Inventory Operations Manager. 
     Your goal is to optimize stock levels based on demand, budget, and storage constraints.
@@ -25,10 +28,28 @@ export const inventoryAgent = new Agent({
     4. EXPLAIN YOUR REASONING: Why did you pick this action? 
     5. WHY NOT: Why did you reject the other two actions? (e.g., "Rejected Restock because budget is over limit").
     
-    Return your response in structured JSON format.
+    Use the inventreeTool to fetch inventory snapshots and the scorers to evaluate decisions.
+    Return concise, structured JSON where appropriate.
   `,
-  model: google("gemini-2.0-flash"),
-  outputs: {
-    decision: InventoryDecisionSchema,
-  }
+  model: 'google/gemini-2.0-flash',
+  tools: { inventreeTool },
+  scorers: {
+    decisionAppropriateness: {
+      scorer: scorers.decisionAppropriatenessScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
+    explanationQuality: {
+      scorer: scorers.explanationQualityScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
+    costOptimization: {
+      scorer: scorers.costOptimizationScorer,
+      sampling: { type: 'ratio', rate: 1 },
+    },
+  },
+  memory: new Memory({
+    storage: new LibSQLStore({
+      url: 'file:../mastra.db',
+    }),
+  }),
 });
