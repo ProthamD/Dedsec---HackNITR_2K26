@@ -1,5 +1,16 @@
 import { Agent } from "@mastra/core/agent";
 import { google } from "@ai-sdk/google";
+import { z } from "zod";
+
+const InventoryDecisionSchema = z.object({
+  sku: z.string(),
+  productName: z.string(),
+  action: z.enum(["RESTOCK_URGENT", "RESTOCK_NORMAL", "HOLD", "DISCOUNT_TO_CLEAR"]),
+  recommendedQuantity: z.number(),
+  reasoning: z.string().describe("Human-like explanation of why this action was taken"),
+  whyNot: z.string().describe("Explanation of why alternative actions were rejected"),
+  riskScore: z.number().min(1).max(10),
+});
 
 export const inventoryAgent = new Agent({
   name: "Inventory Manager Agent",
@@ -17,4 +28,7 @@ export const inventoryAgent = new Agent({
     Return your response in structured JSON format.
   `,
   model: google("gemini-2.0-flash"),
+  outputs: {
+    decision: InventoryDecisionSchema,
+  }
 });
