@@ -45,8 +45,25 @@ async function sendMessage() {
             addMessage('Sorry, I encountered an error: ' + data.message, 'bot');
         } else {
             // Extract the text from Mastra response
-            const botMessage = data.text || data.message || JSON.stringify(data);
-            addMessage(botMessage, 'bot');
+            let botMessage = data.text || data.message;
+            
+            // Check if response contains JSON (with or without markdown code blocks)
+            let jsonMatch = botMessage.match(/```json\s*(\{[\s\S]*?\})\s*```|^(\{[\s\S]*\})$/);
+            if (jsonMatch) {
+                try {
+                    const jsonString = jsonMatch[1] || jsonMatch[2];
+                    const jsonData = JSON.parse(jsonString);
+                    botMessage = formatJsonResponse(jsonData);
+                } catch (e) {
+                    // Keep original if not valid JSON
+                    botMessage = cleanMarkdownResponse(botMessage);
+                }
+            } else if (botMessage) {
+                // Clean up markdown formatting
+                botMessage = cleanMarkdownResponse(botMessage);
+            }
+            
+            addMessage(botMessage || JSON.stringify(data), 'bot');
         }
     } catch (error) {
         hideTypingIndicator();
@@ -64,8 +81,8 @@ function addMessage(text, sender) {
     messageDiv.className = sender === 'user' ? 'flex justify-end animate-slide-in' : 'flex justify-start animate-slide-in';
     
     const bubbleClass = sender === 'user' 
-        ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white rounded-3xl rounded-tr-md px-7 py-5 max-w-[85%] shadow-xl'
-        : 'bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-3xl rounded-tl-md px-7 py-5 max-w-[85%] shadow-xl';
+        ? 'bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-3xl rounded-tr-md px-7 py-5 max-w-[85%] shadow-xl border border-gray-600'
+        : 'bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 text-white rounded-3xl rounded-tl-md px-7 py-5 max-w-[85%] shadow-xl border border-gray-700';
     
     messageDiv.innerHTML = `<div class="${bubbleClass}"><p class="leading-relaxed text-base">${text}</p></div>`;
     chatMessages.appendChild(messageDiv);
@@ -92,4 +109,167 @@ function showTypingIndicator() {
 function hideTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
     if (indicator) indicator.remove();
+}
+
+function cleanMarkdownResponse(text) {
+    if (!text) return '';
+    
+    // Remove excessive separators
+    text = text.replace(/^-{3,}$/gm, '');
+    text = text.replace(/^={3,}$/gm, '');
+    
+    // Convert markdown tables to HTML
+    text = text.replace(/\|(.+)\|/g, (match, content) => {
+        const cells = content.split('|').map(c => c.trim()).filter(c => c);
+        if (cells.every(c => c.match(/^[-:]+$/))) return ''; // Skip separator row
+        const cellTags = cells.map(c => `<td class="px-3 py-2 border-b border-gray-700">${c}</td>`).join('');
+        return `<tr>${cellTags}</tr>`;
+    });
+    
+    // Wrap tables
+    if (text.includes('<tr>')) {
+        text = text.replace(/(<tr>.*<\/tr>)/gs, '<table class="w-full bg-gray-800/30 rounded-lg my-3 text-sm">$1</table>');
+    }
+    
+    // Convert headers
+    text = text.replace(/^###\s+(.+)$/gm, '<div class="text-lg font-bold mt-4 mb-2">$1</div>');
+    text = text.replace(/^##\s+(.+)$/gm, '<div class="text-xl font-bold mt-4 mb-2">$1</div>');
+    text = text.replace(/^#\s+(.+)$/gm, '<div class="text-2xl font-bold mt-4 mb-2">$1</div>');
+    
+    // Convert bold
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert code blocks
+    text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, (match, lang, code) => {
+        return `<pre class="bg-gray-800/50 rounded-lg p-3 my-2 overflow-x-auto text-xs"><code>${code.trim()}</code></pre>`;
+    });
+    
+    // Convert inline code
+    text = text.replace(/`([^`]+)`/g, '<code class="bg-gray-800/50 px-2 py-1 rounded text-xs">$1</code>');
+    
+    // Convert bullet points
+    text = text.replace(/^[\-\*]\s+(.+)$/gm, '<div class="ml-4 mb-1">• $1</div>');
+    text = text.replace(/^\d+\.\s+(.+)$/gm, '<div class="ml-4 mb-1">$1</div>');
+    
+    // Convert line breaks
+    text = text.replace(/\n\n/g, '<br><br>');
+    text = text.replace(/\n/g, '<br>');
+    
+    // Clean up excessive breaks
+    text = text.replace(/(<br>){3,}/g, '<br><br>');
+    
+    return text;
+}
+
+function formatJsonResponse(json) {
+    if (!json) return 'No response received.';
+    
+    // Format comprehensive restock recommendation
+    if (json.action && json.sku) {
+        const actionEmoji = {
+            'RESTOCK_URGENT': '🚨',
+            'RESTOCK_NORMAL': '📦',
+            'HOLD': '⏸️',
+            'DISCOUNT_TO_CLEAR': '💸'
+        };
+        
+        const emoji = actionEmoji[json.action] || '📊';
+        const productName = json.productName || json.sku;
+        
+        let response = `<div class="space-y-4">`;
+        
+        // Title
+        response += `<div class="text-xl font-bold mb-4">
+            ${emoji} Inventory Analysis for ${productName} (${json.sku})
+        </div>`;
+        
+        // 📊 Fetched Data Summary
+        response += `<div class="mb-4">
+            <div class="font-bold text-lg mb-2">📊 Data Summary</div>
+            <div class="bg-gray-800/50 rounded-lg p-3 space-y-1 text-sm">
+                <div><span class="text-gray-400">SKU:</span> ${json.sku}</div>
+                <div><span class="text-gray-400">Product:</span> ${productName}</div>
+                <div><span class="text-gray-400">Recommended Action:</span> <strong>${json.action.replace(/_/g, ' ')}</strong></div>
+                ${json.recommendedQuantity ? `<div><span class="text-gray-400">Quantity:</span> <strong>${json.recommendedQuantity} units</strong></div>` : ''}
+            </div>
+        </div>`;
+        
+        // 📈 Analysis
+        if (json.reasoning) {
+            response += `<div class="mb-4">
+                <div class="font-bold text-lg mb-2">📈 Analysis</div>
+                <div class="bg-gray-800/50 rounded-lg p-3 text-sm leading-relaxed">
+                    ${json.reasoning}
+                </div>
+            </div>`;
+        }
+        
+        // 🔍 Decision Logic
+        if (json.whyNot) {
+            response += `<div class="mb-4">
+                <div class="font-bold text-lg mb-2">🔍 Why This Action?</div>
+                <div class="bg-gray-800/50 rounded-lg p-3 text-sm leading-relaxed">
+                    ${json.whyNot}
+                </div>
+            </div>`;
+        }
+        
+        // Risk & Sustainability
+        response += `<div class="flex gap-2 mb-2">`;
+        if (json.riskScore !== undefined) {
+            const riskColor = json.riskScore >= 7 ? 'text-red-400' : json.riskScore >= 4 ? 'text-yellow-400' : 'text-green-400';
+            response += `<div class="bg-gray-800/50 rounded-lg px-3 py-2 text-sm flex-1">
+                <span class="text-gray-400">Risk Score:</span> 
+                <strong class="${riskColor}">${json.riskScore}/10</strong>
+            </div>`;
+        }
+        if (json.sustainabilityRating) {
+            response += `<div class="bg-gray-800/50 rounded-lg px-3 py-2 text-sm flex-1">
+                <span class="text-gray-400">Sustainability:</span> 
+                <strong>${json.sustainabilityRating}</strong>
+            </div>`;
+        }
+        response += `</div>`;
+        
+        // ✅ Next Steps
+        response += `<div class="mt-4 pt-3 border-t border-gray-600">
+            <div class="font-bold text-sm mb-2">✅ Recommended Next Steps:</div>
+            <div class="text-sm text-gray-300 leading-relaxed">`;
+        
+        if (json.action === 'RESTOCK_URGENT') {
+            response += `• <strong>Immediate action required</strong> to avoid stockout<br>`;
+            response += `• Place order for ${json.recommendedQuantity || 'recommended'} units<br>`;
+            response += `• Monitor lead time (ensure delivery before stock runs out)`;
+        } else if (json.action === 'RESTOCK_NORMAL') {
+            response += `• Schedule regular restock order<br>`;
+            response += `• Order ${json.recommendedQuantity || 'recommended'} units<br>`;
+            response += `• Review demand trends before next order`;
+        } else if (json.action === 'HOLD') {
+            response += `• Monitor inventory levels closely<br>`;
+            response += `• Watch for demand changes or trends<br>`;
+            response += `• Re-evaluate if conditions change`;
+        } else if (json.action === 'DISCOUNT_TO_CLEAR') {
+            response += `• Implement clearance pricing strategy<br>`;
+            response += `• Reduce holding costs by selling excess<br>`;
+            response += `• Consider bundling with popular items`;
+        }
+        
+        response += `</div></div>`;
+        response += `</div>`;
+        
+        return response;
+    }
+    
+    // Format general analysis
+    if (json.analysis || json.recommendation) {
+        let response = '<div class="space-y-3">';
+        if (json.analysis) response += `<div><div class="font-bold mb-1">📊 Analysis:</div><div class="text-sm">${json.analysis}</div></div>`;
+        if (json.recommendation) response += `<div><div class="font-bold mb-1">💡 Recommendation:</div><div class="text-sm">${json.recommendation}</div></div>`;
+        response += '</div>';
+        return response;
+    }
+    
+    // Default: pretty print JSON
+    return '<pre class="text-xs bg-gray-800/50 p-3 rounded-lg overflow-x-auto">' + 
+           JSON.stringify(json, null, 2) + '</pre>';
 }

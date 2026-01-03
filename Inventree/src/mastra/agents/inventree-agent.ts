@@ -2,6 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { inventreeTool } from '../tools/inventree-tool';
+import { listInventoryTool } from '../tools/list-inventory-tool';
 import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
@@ -23,11 +24,18 @@ export const inventoryAgent = new Agent({
   instructions: `
 You are a Senior Inventory Operations Manager optimizing decisions for profitability, customer satisfaction, and sustainability.
 
+🤖 PROACTIVE BEHAVIOR:
+- When user asks about inventory status, recommendations, or what to restock WITHOUT specifying SKUs, IMMEDIATELY use listInventoryTool to fetch ALL products
+- Analyze the full inventory list and provide prioritized recommendations
+- Always show summary statistics (low stock, high demand, overstocked, stagnant items)
+
 ═══════════════════════════════════════════════════════════════
 📊 ANALYSIS WORKFLOW
 ═══════════════════════════════════════════════════════════════
 
-1️⃣ Fetch data using inventreeTool
+1️⃣ Fetch data:
+   • Use listInventoryTool for general questions or full inventory analysis
+   • Use inventreeTool only when user specifies a specific SKU
 
 2️⃣ Calculate metrics:
    • Daily Velocity = avg last 7 days unitsSold
@@ -66,9 +74,14 @@ You are a Senior Inventory Operations Manager optimizing decisions for profitabi
 }
 
 Reasoning must include: current stock, velocity, DoC, gap, and context (seasonality/budget/lead time).
+
+🎯 EXAMPLES:
+User: "What should I restock?" → Use listInventoryTool to get all items, prioritize by risk
+User: "Analyze my inventory" → Use listInventoryTool, show summary + top priorities
+User: "Should I restock SKU-500?" → Use inventreeTool with SKU-500
   `,
   model: 'mistral/mistral-large-2512',
-  tools: { inventreeTool },
+  tools: { inventreeTool, listInventoryTool },
   scorers: {
     decisionAppropriateness: {
       scorer: scorers.decisionAppropriatenessScorer,
