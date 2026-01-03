@@ -1,0 +1,406 @@
+[
+  {
+    "id": "sku-1000",
+    "name": "Gemini Phone Pro A",
+    "category": "Smartphones",
+    "current_stock": 6,
+    "avg_daily_sales": 12.3,
+    "unit_cost": 700,
+    "selling_price": 1100,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.11",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.69",
+    "tags": [
+      "high-risk",
+      "promo-eligible"
+    ]
+  },
+  {
+    "id": "sku-1001",
+    "name": "Sonic Buds B",
+    "category": "Audio",
+    "current_stock": 72,
+    "avg_daily_sales": 8.9,
+    "unit_cost": 40,
+    "selling_price": 99,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.18",
+    "market_signal": "Declining",
+    "supplier_reliability": "0.72",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1002",
+    "name": "Ultra Charge 65W C",
+    "category": "Power",
+    "current_stock": 71,
+    "avg_daily_sales": 9.7,
+    "unit_cost": 15,
+    "selling_price": 39,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.27",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.82",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1003",
+    "name": "Zen Watch D",
+    "category": "Wearables",
+    "current_stock": 27,
+    "avg_daily_sales": 7,
+    "unit_cost": 150,
+    "selling_price": 299,
+    "lead_time_days": 4,
+    "storage_space_per_unit": "0.35",
+    "market_signal": "Declining",
+    "supplier_reliability": "0.62",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1004",
+    "name": "Power Bank 20k E",
+    "category": "Power",
+    "current_stock": 34,
+    "avg_daily_sales": 14.7,
+    "unit_cost": 25,
+    "selling_price": 59,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.31",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "1.00",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1005",
+    "name": "Gemini Phone Pro A",
+    "category": "Smartphones",
+    "current_stock": 31,
+    "avg_daily_sales": 5.4,
+    "unit_cost": 700,
+    "selling_price": 1100,
+    "lead_time_days": 2,
+    "storage_space_per_unit": "0.36",
+    "market_signal": "Declining",
+    "supplier_reliability": "0.79",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1006",
+    "name": "Sonic Buds B",
+    "category": "Audio",
+    "current_stock": 64,
+    "avg_daily_sales": 3,
+    "unit_cost": 40,
+    "selling_price": 99,
+    "lead_time_days": 2,
+    "storage_space_per_unit": "0.46",
+    "market_signal": "Trending High",
+    "supplier_reliability": "0.79",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1007",
+    "name": "Ultra Charge 65W C",
+    "category": "Power",
+    "current_stock": 59,
+    "avg_daily_sales": 4.1,
+    "unit_cost": 15,
+    "selling_price": 39,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.54",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.75",
+    "tags": [
+      "high-risk",
+      "promo-eligible"
+    ]
+  },
+  {
+    "id": "sku-1008",
+    "name": "Zen Watch D",
+    "category": "Wearables",
+    "current_stock": 81,
+    "avg_daily_sales": 4.5,
+    "unit_cost": 150,
+    "selling_price": 299,
+    "lead_time_days": 6,
+    "storage_space_per_unit": "0.43",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "0.69",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1009",
+    "name": "Power Bank 20k E",
+    "category": "Power",
+    "current_stock": 6,
+    "avg_daily_sales": 16,
+    "unit_cost": 25,
+    "selling_price": 59,
+    "lead_time_days": 4,
+    "storage_space_per_unit": "0.35",
+    "market_signal": "Declining",
+    "supplier_reliability": "0.77",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1010",
+    "name": "Gemini Phone Pro A",
+    "category": "Smartphones",
+    "current_stock": 99,
+    "avg_daily_sales": 11,
+    "unit_cost": 700,
+    "selling_price": 1100,
+    "lead_time_days": 2,
+    "storage_space_per_unit": "0.52",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.75",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1011",
+    "name": "Sonic Buds B",
+    "category": "Audio",
+    "current_stock": 70,
+    "avg_daily_sales": 11.9,
+    "unit_cost": 40,
+    "selling_price": 99,
+    "lead_time_days": 4,
+    "storage_space_per_unit": "0.18",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.86",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1012",
+    "name": "Ultra Charge 65W C",
+    "category": "Power",
+    "current_stock": 27,
+    "avg_daily_sales": 16.5,
+    "unit_cost": 15,
+    "selling_price": 39,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.23",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.87",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1013",
+    "name": "Zen Watch D",
+    "category": "Wearables",
+    "current_stock": 59,
+    "avg_daily_sales": 4.6,
+    "unit_cost": 150,
+    "selling_price": 299,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.14",
+    "market_signal": "Trending High",
+    "supplier_reliability": "0.77",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1014",
+    "name": "Power Bank 20k E",
+    "category": "Power",
+    "current_stock": 22,
+    "avg_daily_sales": 6.6,
+    "unit_cost": 25,
+    "selling_price": 59,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.44",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.65",
+    "tags": [
+      "high-risk",
+      "promo-eligible"
+    ]
+  },
+  {
+    "id": "sku-1015",
+    "name": "Gemini Phone Pro A",
+    "category": "Smartphones",
+    "current_stock": 10,
+    "avg_daily_sales": 5.2,
+    "unit_cost": 700,
+    "selling_price": 1100,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.48",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.97",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1016",
+    "name": "Sonic Buds B",
+    "category": "Audio",
+    "current_stock": 49,
+    "avg_daily_sales": 10.3,
+    "unit_cost": 40,
+    "selling_price": 99,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.52",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "0.81",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1017",
+    "name": "Ultra Charge 65W C",
+    "category": "Power",
+    "current_stock": 14,
+    "avg_daily_sales": 3.7,
+    "unit_cost": 15,
+    "selling_price": 39,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.29",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "0.65",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1018",
+    "name": "Zen Watch D",
+    "category": "Wearables",
+    "current_stock": 42,
+    "avg_daily_sales": 14.2,
+    "unit_cost": 150,
+    "selling_price": 299,
+    "lead_time_days": 4,
+    "storage_space_per_unit": "0.32",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.96",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1019",
+    "name": "Power Bank 20k E",
+    "category": "Power",
+    "current_stock": 8,
+    "avg_daily_sales": 6.7,
+    "unit_cost": 25,
+    "selling_price": 59,
+    "lead_time_days": 6,
+    "storage_space_per_unit": "0.41",
+    "market_signal": "Stable",
+    "supplier_reliability": "0.86",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1020",
+    "name": "Gemini Phone Pro A",
+    "category": "Smartphones",
+    "current_stock": 25,
+    "avg_daily_sales": 8,
+    "unit_cost": 700,
+    "selling_price": 1100,
+    "lead_time_days": 6,
+    "storage_space_per_unit": "0.51",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "0.71",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1021",
+    "name": "Sonic Buds B",
+    "category": "Audio",
+    "current_stock": 94,
+    "avg_daily_sales": 8.9,
+    "unit_cost": 40,
+    "selling_price": 99,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.44",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.68",
+    "tags": [
+      "high-risk",
+      "promo-eligible"
+    ]
+  },
+  {
+    "id": "sku-1022",
+    "name": "Ultra Charge 65W C",
+    "category": "Power",
+    "current_stock": 3,
+    "avg_daily_sales": 15,
+    "unit_cost": 15,
+    "selling_price": 39,
+    "lead_time_days": 3,
+    "storage_space_per_unit": "0.53",
+    "market_signal": "Holiday Peak",
+    "supplier_reliability": "0.88",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1023",
+    "name": "Zen Watch D",
+    "category": "Wearables",
+    "current_stock": 42,
+    "avg_daily_sales": 16.5,
+    "unit_cost": 150,
+    "selling_price": 299,
+    "lead_time_days": 5,
+    "storage_space_per_unit": "0.31",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.90",
+    "tags": [
+      "standard"
+    ]
+  },
+  {
+    "id": "sku-1024",
+    "name": "Power Bank 20k E",
+    "category": "Power",
+    "current_stock": 19,
+    "avg_daily_sales": 5.6,
+    "unit_cost": 25,
+    "selling_price": 59,
+    "lead_time_days": 6,
+    "storage_space_per_unit": "0.28",
+    "market_signal": "Viral (Social Media)",
+    "supplier_reliability": "0.70",
+    "tags": [
+      "standard"
+    ]
+  }
+]
