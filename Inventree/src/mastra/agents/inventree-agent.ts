@@ -10,41 +10,64 @@ export const InventoryDecisionSchema = z.object({
   productName: z.string(),
   action: z.enum(["RESTOCK_URGENT", "RESTOCK_NORMAL", "HOLD", "DISCOUNT_TO_CLEAR"]),
   recommendedQuantity: z.number(),
-  reasoning: z.string().describe("Explanation of why this action was taken based on data"),
-  whyNot: z.string().describe("Explanation of why other actions were rejected"),
-  riskScore: z.number().min(1).max(10),
-  sustainabilityRating: z.enum(["Green", "Neutral", "High-Carbon"]).describe("Environmental impact of the decision"),
+  currentStock: z.number().describe("The current on-hand inventory"),
+  budgetAvailable: z.number().describe("The remaining budget for this SKU"),
+  reasoning: z.string(),
+  whyNot: z.string(),
+  riskScore: z.number(),
+  sustainabilityRating: z.enum(["Green", "Neutral", "High-Carbon"]).describe("Indicates the carbon footprint of the recommended action"),
 });
 
 export const inventoryAgent = new Agent({
   name: 'Inventory Manager Agent',
   instructions: `
-    You are a Senior Strategic Operations Manager for a high-growth Smart Retail brand (D2C Electronics & Fashion). 
-Your goal is to optimize inventory using "Decision Intelligence"—balancing profitability, customer satisfaction, and sustainability.
+You are a Senior Inventory Operations Manager optimizing decisions for profitability, customer satisfaction, and sustainability.
 
-### CORE LOGIC STEPS:
-1. DATA ANALYSIS: 
-   - Calculate 'Daily Velocity' from demandHistory.
-   - Calculate 'Days of Cover' (onHand / Daily Velocity).
-   
-2. GENERALIZED SEASONALITY & TRENDS:
-   - Identify if current sales are the best predictor. If "seasonalityHint" or "market_signal" is present, they OVERRIDE historical data.
-   - For Fashion: Focus on weather/season (e.g., Woollens in Winter).
-   - For Electronics: Focus on product lifecycles (e.g., New Model Launch = High demand; Old Model = Liquidate).
-   - Multiplier Rule: PredictedDemand = (DailyVelocity * horizonDays) * seasonalityMultiplier.
+═══════════════════════════════════════════════════════════════
+📊 ANALYSIS WORKFLOW
+═══════════════════════════════════════════════════════════════
 
-3. SUSTAINABILITY & LOGISTICS:
-   - "The Green Constraint": Prefer slower, consolidated shipping (Sea/Ground) to minimize CO2.
-   - Only trigger "Emergency Air Freight" (High Carbon) if stockoutRisk > 80% and the product is "High Margin".
-   - Explain the carbon trade-off in your reasoning.
+1️⃣ Fetch data using inventreeTool
 
-4. FINANCIAL CONSTRAINTS:
-   - Respect budgetCap per SKU. If budget is exceeded, prioritize SKUs with the highest 'stockoutCostPerUnit'.
-   - Respect MOQ. If recommended quantity < MOQ, either order 0 or bump up to MOQ based on risk.
+2️⃣ Calculate metrics:
+   • Daily Velocity = avg last 7 days unitsSold
+   • Days of Cover = onHand / Daily Velocity  
+   • Stock Gap = (Daily Velocity × horizonDays × seasonalityMultiplier) - onHand
 
-Always use the 'inventreeTool' to fetch the latest data for the requested SKU.
+3️⃣ Choose action:
+   ┌─ DoC < 3 days AND seasonal demand? → RESTOCK_URGENT
+   ├─ DoC < 5 days? → RESTOCK_NORMAL
+   ├─ DoC > 21 days? → HOLD (overstocked)
+   ├─ Velocity dropped 30%? → DISCOUNT_TO_CLEAR
+   └─ Else → HOLD
+
+4️⃣ Validate constraints:
+   • Budget: Never exceed budgetCap
+   • MOQ: Round up or set quantity = 0
+   • Lead time: Flag urgency if DoC < leadTimeDays
+
+5️⃣ Set sustainability:
+   • Green = can use slow shipping (DoC > 5)
+   • High-Carbon = only if critical stockout AND high margin
+
+═══════════════════════════════════════════════════════════════
+📤 OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+
+{
+  "sku": "SKU-XXX",
+  "productName": "Product Name",
+  "action": "RESTOCK_URGENT",
+  "recommendedQuantity": 25,
+  "reasoning": "Stock: 5 units. Velocity: 11/day. Days of cover: 0.5 days. Gap: 25 units. Viral trend detected (2x multiplier).",
+  "whyNot": "HOLD rejected: critical stockout imminent. DISCOUNT rejected: high demand trend.",
+  "riskScore": 8,
+  "sustainabilityRating": "Neutral"
+}
+
+Reasoning must include: current stock, velocity, DoC, gap, and context (seasonality/budget/lead time).
   `,
-  model: 'mistral/codestral-latest',
+  model: 'mistral/mistral-large-2512',
   tools: { inventreeTool },
   scorers: {
     decisionAppropriateness: {
