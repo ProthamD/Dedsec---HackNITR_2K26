@@ -1,47 +1,62 @@
 const fs = require('fs');
 const path = require('path');
 
-const generateData = () => {
-  const categories = ['Smartphones', 'Audio', 'Power', 'Wearables'];
-  const marketSignals = ['Stable', 'Trending High', 'Declining', 'Viral (Social Media)', 'Holiday Peak'];
-  
-  const products = [
-    { name: 'Gemini Phone Pro', cat: 'Smartphones', cost: 700, price: 1100 },
-    { name: 'Sonic Buds', cat: 'Audio', cost: 40, price: 99 },
-    { name: 'Ultra Charge 65W', cat: 'Power', cost: 15, price: 39 },
-    { name: 'Zen Watch', cat: 'Wearables', cost: 150, price: 299 },
-    { name: 'Power Bank 20k', cat: 'Power', cost: 25, price: 59 }
-  ];
-
-  const inventory = [];
-
-  for (let i = 0; i < 25; i++) {
-    const template = products[i % products.length];
-    const stock = Math.floor(Math.random() * 100);
-    const dailySales = (Math.random() * 15 + 2).toFixed(1);
-    
-    inventory.push({
-      id: `sku-${1000 + i}`,
-      name: `${template.name} ${String.fromCharCode(65 + (i % 5))}`, // Variation A, B, C...
-      category: template.cat,
-      current_stock: stock,
-      avg_daily_sales: parseFloat(dailySales),
-      unit_cost: template.cost,
-      selling_price: template.price,
-      lead_time_days: Math.floor(Math.random() * 5) + 2,
-      storage_space_per_unit: (Math.random() * 0.5 + 0.1).toFixed(2), // cubic meters
-      market_signal: marketSignals[Math.floor(Math.random() * marketSignals.length)],
-      supplier_reliability: (Math.random() * 0.4 + 0.6).toFixed(2), // 0.6 to 1.0
-      tags: i % 7 === 0 ? ["high-risk", "promo-eligible"] : ["standard"]
+const generateHistory = (baseSales, trend = 1) => {
+  const history = [];
+  const today = new Date();
+  for (let i = 21; i > 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    // Multiply by trend to simulate growth or decline over the 21 days
+    const trendFactor = 1 + (trend - 1) * (i / 21);
+    history.push({
+      date: date.toISOString().split('T')[0],
+      unitsSold: Math.max(0, Math.floor(baseSales * trendFactor * (0.8 + Math.random() * 0.4)))
     });
   }
-
-  // Ensure the directory exists
-  const dir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  fs.writeFileSync(path.join(dir, 'inventory.json'), JSON.stringify(inventory, null, 2));
-  console.log(`Success! Generated 25 products in src/data/inventory.json`);
+  return history;
 };
 
-generateData();
+const categories = [
+  { name: "Smartphone", cost: 800, baseSales: 5, budget: 15000 },
+  { name: "Earbuds", cost: 50, baseSales: 20, budget: 3000 },
+  { name: "Charger", cost: 15, baseSales: 40, budget: 2000 },
+  { name: "Smartwatch", cost: 200, baseSales: 8, budget: 5000 },
+  { name: "Laptop", cost: 1200, baseSales: 2, budget: 20000 }
+];
+
+const inventoryData = [];
+
+for (let i = 0; i < 15; i++) {
+  const cat = categories[i % categories.length];
+  // Create variations in the data to test the agent
+  const isViral = i === 0; // First item is viral
+  const isLowBudget = i === 4; // Fifth item has a tiny budget cap
+  const longLeadTime = i === 7; // Eighth item takes forever to arrive
+
+  inventoryData.push({
+    sku: `SKU-${200 + i}`,
+    name: `${cat.name} ${String.fromCharCode(65 + i)}`,
+    location: "Main-Warehouse",
+    horizonDays: 21,
+    onHand: isViral ? 5 : Math.floor(Math.random() * 60) + 10,
+    inboundUnits: 0,
+    leadTimeDays: longLeadTime ? 15 : Math.floor(Math.random() * 4) + 2,
+    moq: 5,
+    unitCost: cat.cost,
+    budgetCap: isLowBudget ? 500 : cat.budget,
+    holdingCostPerUnit: (cat.cost * 0.01).toFixed(2),
+    stockoutCostPerUnit: (cat.cost * 1.2).toFixed(2),
+    safetyStockDays: 3,
+    targetServiceLevel: 0.95,
+    demandHistory: generateHistory(cat.baseSales, isViral ? 2.5 : 1.0), // Viral item has 2.5x growth trend
+    seasonalityHint: isViral ? "Influencer Shoutout" : "Stable",
+    seasonalityMultiplier: isViral ? 2.0 : 1.0
+  });
+}
+
+const dir = path.join(__dirname, 'data');
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+fs.writeFileSync(path.join(dir, 'inventory.json'), JSON.stringify(inventoryData, null, 2));
+console.log("inventory.json generated with 15 diverse test cases!");
