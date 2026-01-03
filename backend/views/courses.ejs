@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management Courses - Inventree</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--bg-card);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+        }
+
+        header h1 span.green {
+            color: var(--accent-green);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: var(--border);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .intro h2 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            color: var(--accent-green);
+        }
+
+        .intro p {
+            font-size: 1.1em;
+            color: var(--text-muted);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .course-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-green), #4caf50);
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+        }
+
+        .course-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .course-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-green), #4caf50);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .course-level {
+            padding: 4px 12px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            font-size: 0.85em;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .course-title {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .course-description {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            color: var(--text-muted);
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stars {
+            color: #ffc107;
+            font-size: 1.1em;
+        }
+
+        .open-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .open-btn:hover {
+            background: #4caf50;
+            transform: scale(1.02);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 10;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--accent-green);
+        }
+
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1em;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            font-size: 1.5em;
+            color: var(--accent-green);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .section li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: var(--bg-primary);
+            border-left: 3px solid var(--accent-green);
+            border-radius: 6px;
+            color: var(--text-primary);
+        }
+
+        .section li strong {
+            color: var(--accent-green);
+        }
+
+        .highlight-box {
+            background: var(--bg-primary);
+            border: 1px solid var(--accent-green);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .step-card {
+            background: var(--bg-primary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 0.9em;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 Inventory <span class="green">Courses</span></h1>
+        <a href="/" class="back-btn">
+            <i data-feather="arrow-left"></i>
+            <span>Back to Dashboard</span>
+        </a>
+    </header>
+
+    <div class="container">
+        <div class="intro">
+            <h2>Master Inventory Management</h2>
+            <p>Learn essential inventory management skills designed for small and medium-sized enterprises. From basics to advanced optimization strategies.</p>
+        </div>
+
+        <div class="courses-grid">
+            <!-- Course 1: Fundamentals -->
+            <div class="course-card" onclick="openModal('course1')">
+                <div class="course-header">
+                    <div class="course-icon">📦</div>
+                    <span class="course-level">Beginner</span>
+                </div>
+                <h3 class="course-title">Inventory Management Fundamentals</h3>
+                <p class="course-description">
+                    Master the basics of inventory management. Learn core concepts, terminology, and why effective inventory control is crucial for business success.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>15 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★★</span>
+                        <span>4.9/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Course 2: Setting Up -->
+            <div class="course-card" onclick="openModal('course2')">
+                <div class="course-header">
+                    <div class="course-icon">⚙️</div>
+                    <span class="course-level">Beginner</span>
+                </div>
+                <h3 class="course-title">Setting Up Your First Inventory System</h3>
+                <p class="course-description">
+                    Step-by-step guide to implementing your first inventory system. From choosing the right tools to organizing your warehouse.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>20 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★★</span>
+                        <span>4.8/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Course 3: Stock Optimization -->
+            <div class="course-card" onclick="openModal('course3')">
+                <div class="course-header">
+                    <div class="course-icon">📊</div>
+                    <span class="course-level">Intermediate</span>
+                </div>
+                <h3 class="course-title">Stock Optimization Strategies</h3>
+                <p class="course-description">
+                    Learn advanced techniques to optimize stock levels, reduce waste, and improve cash flow through data-driven decision making.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>25 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★★</span>
+                        <span>4.9/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Course 4: Automation -->
+            <div class="course-card" onclick="openModal('course4')">
+                <div class="course-header">
+                    <div class="course-icon">🤖</div>
+                    <span class="course-level">Intermediate</span>
+                </div>
+                <h3 class="course-title">Inventory Automation & AI</h3>
+                <p class="course-description">
+                    Discover how to leverage automation and AI to streamline operations, predict demand, and make smarter inventory decisions.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>30 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★☆</span>
+                        <span>4.7/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Course 5: Supply Chain -->
+            <div class="course-card" onclick="openModal('course5')">
+                <div class="course-header">
+                    <div class="course-icon">🚚</div>
+                    <span class="course-level">Advanced</span>
+                </div>
+                <h3 class="course-title">Supply Chain & Logistics Integration</h3>
+                <p class="course-description">
+                    Master the integration of inventory management with supply chain logistics, shipping optimization, and vendor management.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>35 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★★</span>
+                        <span>4.9/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+
+            <!-- Course 6: Scaling -->
+            <div class="course-card" onclick="openModal('course6')">
+                <div class="course-header">
+                    <div class="course-icon">🚀</div>
+                    <span class="course-level">Advanced</span>
+                </div>
+                <h3 class="course-title">Scaling Your Inventory Operations</h3>
+                <p class="course-description">
+                    Learn strategies for scaling inventory systems as your business grows, including multi-location management and advanced analytics.
+                </p>
+                <div class="course-meta">
+                    <div class="meta-item">
+                        <i data-feather="clock" style="width: 16px; height: 16px;"></i>
+                        <span>40 min read</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">★★★★★</span>
+                        <span>5.0/5</span>
+                    </div>
+                </div>
+                <button class="open-btn">
+                    <span>Open Course</span>
+                    <i data-feather="arrow-right" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="courseModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-close" onclick="closeModal()">
+                    <i data-feather="x" style="width: 20px; height: 20px;"></i>
+                </div>
+                <h2 class="modal-title" id="modalTitle">Course Title</h2>
+                <p class="modal-subtitle" id="modalSubtitle">Course subtitle</p>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        const courseContent = {
+            course1: {
+                title: "Inventory Management Fundamentals",
+                subtitle: "Master the essential concepts of inventory management",
+                content: `
+                    <div class="section">
+                        <h3>📖 What is Inventory Management?</h3>
+                        <p>
+                            Inventory management is the systematic approach to sourcing, storing, and selling inventory—both raw materials (components) and finished goods (products). It's about having the right products, in the right quantity, at the right time, and at the right cost.
+                        </p>
+                        <div class="highlight-box">
+                            <h4>Why It Matters for SMEs</h4>
+                            <p>For small and medium-sized enterprises, effective inventory management can be the difference between profit and loss. It directly impacts cash flow, customer satisfaction, and operational efficiency.</p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🎯 Key Concepts</h3>
+                        <ul>
+                            <li><strong>Stock Keeping Unit (SKU):</strong> A unique identifier for each distinct product in your inventory</li>
+                            <li><strong>Lead Time:</strong> The time between placing an order and receiving the goods</li>
+                            <li><strong>Safety Stock:</strong> Extra inventory held to prevent stockouts due to demand fluctuations</li>
+                            <li><strong>Reorder Point:</strong> The inventory level that triggers a new order</li>
+                            <li><strong>Dead Stock:</strong> Inventory that hasn't sold and is unlikely to sell</li>
+                            <li><strong>Stock Turnover:</strong> How many times inventory is sold and replaced in a period</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>💰 Business Impact</h3>
+                        <p>Proper inventory management delivers measurable benefits:</p>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Cash Flow</div>
+                                <p class="step-desc">Free up capital tied in excess stock</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Customer Satisfaction</div>
+                                <p class="step-desc">Avoid stockouts and delays</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Cost Reduction</div>
+                                <p class="step-desc">Minimize storage and waste costs</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Decision Making</div>
+                                <p class="step-desc">Make data-driven purchasing decisions</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>⚠️ Common Pitfalls</h3>
+                        <ul>
+                            <li><strong>Overstocking:</strong> Tying up cash in slow-moving inventory</li>
+                            <li><strong>Understocking:</strong> Losing sales and disappointing customers</li>
+                            <li><strong>Poor Organization:</strong> Wasting time searching for products</li>
+                            <li><strong>No Tracking System:</strong> Flying blind without accurate data</li>
+                            <li><strong>Ignoring Seasonality:</strong> Not adjusting for demand patterns</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🎓 Key Takeaway</h4>
+                        <p>Inventory management is not just about counting products—it's about optimizing your entire supply chain to maximize profitability while maintaining excellent customer service. Start with the basics, track your metrics, and continuously improve.</p>
+                    </div>
+                `
+            },
+            course2: {
+                title: "Setting Up Your First Inventory System",
+                subtitle: "A practical guide to implementation",
+                content: `
+                    <div class="section">
+                        <h3>🚀 Getting Started</h3>
+                        <p>
+                            Setting up an inventory system doesn't have to be overwhelming. Whether you're transitioning from manual tracking or starting fresh, following a structured approach ensures success.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3>📝 Step-by-Step Implementation</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Audit Current Inventory</div>
+                                <p class="step-desc">Count everything and establish a baseline</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Choose Your System</div>
+                                <p class="step-desc">Select software that fits your needs</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Create SKUs</div>
+                                <p class="step-desc">Develop a logical naming convention</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Organize Physical Space</div>
+                                <p class="step-desc">Design an efficient warehouse layout</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">5</div>
+                                <div class="step-title">Set Par Levels</div>
+                                <p class="step-desc">Determine min/max stock quantities</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">6</div>
+                                <div class="step-title">Train Your Team</div>
+                                <p class="step-desc">Ensure everyone understands the process</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🛠️ Choosing the Right Tools</h3>
+                        <p>For SMEs, consider these factors when selecting inventory software:</p>
+                        <ul>
+                            <li><strong>Scalability:</strong> Can it grow with your business?</li>
+                            <li><strong>Integration:</strong> Does it connect with your existing tools (accounting, e-commerce)?</li>
+                            <li><strong>Ease of Use:</strong> Will your team actually use it?</li>
+                            <li><strong>Cost:</strong> Does the pricing model fit your budget?</li>
+                            <li><strong>Mobile Access:</strong> Can you manage inventory on the go?</li>
+                            <li><strong>Reporting:</strong> Does it provide actionable insights?</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>📦 Warehouse Organization Best Practices</h3>
+                        <div class="highlight-box">
+                            <h4>ABC Analysis</h4>
+                            <p>Organize products by value and turnover rate:</p>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>A Items (20%):</strong> High value, frequent sales - Most accessible locations</li>
+                                <li><strong>B Items (30%):</strong> Moderate value - Standard locations</li>
+                                <li><strong>C Items (50%):</strong> Low value, infrequent - Less accessible areas</li>
+                            </ul>
+                        </div>
+                        <p style="margin-top: 15px;">Additional tips:</p>
+                        <ul>
+                            <li>Use vertical space with shelving systems</li>
+                            <li>Label everything clearly with barcodes or QR codes</li>
+                            <li>Create designated areas for receiving, picking, and shipping</li>
+                            <li>Implement FIFO (First In, First Out) for perishables</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>✅ Implementation Checklist</h3>
+                        <ul>
+                            <li>✓ Complete physical inventory count</li>
+                            <li>✓ Create SKU naming system</li>
+                            <li>✓ Set up inventory software</li>
+                            <li>✓ Input all product data</li>
+                            <li>✓ Organize warehouse layout</li>
+                            <li>✓ Establish reorder points</li>
+                            <li>✓ Train staff on new system</li>
+                            <li>✓ Create SOPs (Standard Operating Procedures)</li>
+                            <li>✓ Schedule regular cycle counts</li>
+                            <li>✓ Set up reporting and KPIs</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🎯 Pro Tip</h4>
+                        <p>Start simple. Don't try to implement every feature at once. Master the basics of receiving, storing, and shipping inventory before adding complex features like demand forecasting or multi-location management.</p>
+                    </div>
+                `
+            },
+            course3: {
+                title: "Stock Optimization Strategies",
+                subtitle: "Data-driven techniques for inventory excellence",
+                content: `
+                    <div class="section">
+                        <h3>📊 Understanding Stock Optimization</h3>
+                        <p>
+                            Stock optimization is about finding the perfect balance—maintaining enough inventory to meet customer demand without tying up excessive capital in stock. It's both an art and a science.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3>🎯 Key Metrics to Track</h3>
+                        <ul>
+                            <li><strong>Inventory Turnover Ratio:</strong> Cost of Goods Sold ÷ Average Inventory Value
+                                <br><span style="color: var(--text-muted); font-size: 0.9em;">Higher is better—means you're selling inventory quickly</span>
+                            </li>
+                            <li><strong>Days Sales of Inventory (DSI):</strong> 365 ÷ Inventory Turnover
+                                <br><span style="color: var(--text-muted); font-size: 0.9em;">How many days it takes to sell your inventory</span>
+                            </li>
+                            <li><strong>Stock-to-Sales Ratio:</strong> Inventory Value ÷ Sales Value
+                                <br><span style="color: var(--text-muted); font-size: 0.9em;">Ideal ratio varies by industry (typically 0.5-1.0)</span>
+                            </li>
+                            <li><strong>Sell-Through Rate:</strong> (Units Sold ÷ Units Received) × 100
+                                <br><span style="color: var(--text-muted); font-size: 0.9em;">Percentage of inventory sold in a period</span>
+                            </li>
+                            <li><strong>Carrying Cost:</strong> Total cost of holding inventory (storage, insurance, depreciation)
+                                <br><span style="color: var(--text-muted); font-size: 0.9em;">Typically 20-30% of inventory value annually</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>🔄 Reorder Point Formula</h3>
+                        <div class="highlight-box">
+                            <h4>Calculate Your Reorder Point</h4>
+                            <p><strong>Reorder Point = (Average Daily Sales × Lead Time) + Safety Stock</strong></p>
+                            <p style="margin-top: 15px;"><strong>Example:</strong></p>
+                            <ul style="margin-top: 10px;">
+                                <li>Average Daily Sales: 10 units</li>
+                                <li>Lead Time: 7 days</li>
+                                <li>Safety Stock: 20 units</li>
+                                <li><strong>Reorder Point = (10 × 7) + 20 = 90 units</strong></li>
+                            </ul>
+                            <p style="margin-top: 15px; color: var(--text-muted);">When inventory hits 90 units, place a new order.</p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>📉 Reducing Excess Stock</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Identify Dead Stock</div>
+                                <p class="step-desc">Items not sold in 90+ days</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Run Promotions</div>
+                                <p class="step-desc">Bundle or discount slow movers</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Return to Supplier</div>
+                                <p class="step-desc">If vendor agreement allows</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Liquidate</div>
+                                <p class="step-desc">Sell to discount retailers</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🎯 Demand Forecasting Basics</h3>
+                        <p>Predict future demand using historical data:</p>
+                        <ul>
+                            <li><strong>Seasonal Trends:</strong> Analyze sales patterns across months/seasons</li>
+                            <li><strong>Growth Rate:</strong> Calculate year-over-year increases</li>
+                            <li><strong>Market Signals:</strong> Monitor industry trends and competitor activity</li>
+                            <li><strong>Lead Indicators:</strong> Track website traffic, marketing campaigns</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 20px;">
+                            <h4>Simple Moving Average Formula</h4>
+                            <p><strong>Forecast = (Month 1 + Month 2 + Month 3) ÷ 3</strong></p>
+                            <p style="margin-top: 10px; color: var(--text-muted);">Use 3-6 months of data for more accuracy. Adjust for seasonality.</p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>💡 Advanced Optimization Techniques</h3>
+                        <ul>
+                            <li><strong>Economic Order Quantity (EOQ):</strong> Calculate optimal order size to minimize costs</li>
+                            <li><strong>Just-In-Time (JIT):</strong> Receive goods only when needed (requires reliable suppliers)</li>
+                            <li><strong>Consignment Inventory:</strong> Supplier owns stock until you sell it</li>
+                            <li><strong>Drop Shipping:</strong> Supplier ships directly to customer (eliminates your inventory)</li>
+                            <li><strong>Cross-Docking:</strong> Transfer incoming shipments directly to outbound vehicles</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🚀 Action Plan</h4>
+                        <p><strong>Week 1:</strong> Set up tracking for key metrics (turnover, DSI, sell-through rate)</p>
+                        <p><strong>Week 2:</strong> Calculate reorder points for top 20% of products (A items)</p>
+                        <p><strong>Week 3:</strong> Identify and create action plan for dead stock</p>
+                        <p><strong>Week 4:</strong> Begin demand forecasting for next quarter</p>
+                    </div>
+                `
+            },
+            course4: {
+                title: "Inventory Automation & AI",
+                subtitle: "Leverage technology for competitive advantage",
+                content: `
+                    <div class="section">
+                        <h3>🤖 The Automation Revolution</h3>
+                        <p>
+                            Automation and AI are no longer just for large enterprises. Modern tools make advanced inventory management accessible to businesses of all sizes, dramatically reducing manual work while improving accuracy.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3>⚡ Quick Wins with Automation</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Auto-Reordering</div>
+                                <p class="step-desc">System triggers orders at reorder points</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Barcode Scanning</div>
+                                <p class="step-desc">Eliminate manual data entry errors</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Stock Alerts</div>
+                                <p class="step-desc">Get notifications for low stock/overstock</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Automated Reports</div>
+                                <p class="step-desc">Daily/weekly insights delivered to inbox</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🧠 AI-Powered Features</h3>
+                        <ul>
+                            <li><strong>Demand Prediction:</strong> AI analyzes patterns to forecast future demand with 85-95% accuracy</li>
+                            <li><strong>Dynamic Pricing:</strong> Automatically adjust prices based on demand, competition, and inventory levels</li>
+                            <li><strong>Anomaly Detection:</strong> Flag unusual patterns (theft, data errors, sudden demand changes)</li>
+                            <li><strong>Smart Categorization:</strong> Auto-tag and organize products using image recognition</li>
+                            <li><strong>Waste Reduction:</strong> Identify products nearing expiration or obsolescence</li>
+                            <li><strong>Supplier Performance:</strong> Track and score vendors on delivery times, quality, pricing</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>📱 Mobile & IoT Integration</h3>
+                        <div class="highlight-box">
+                            <h4>Smart Warehouse Technologies</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>RFID Tags:</strong> Track items in real-time without line-of-sight scanning</li>
+                                <li><strong>Smart Sensors:</strong> Monitor temperature, humidity for sensitive products</li>
+                                <li><strong>Mobile Apps:</strong> Manage inventory from anywhere with smartphones/tablets</li>
+                                <li><strong>Connected Scales:</strong> Auto-update quantities when items are added/removed</li>
+                                <li><strong>Drone Counting:</strong> Autonomous inventory counts in large warehouses</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🔗 System Integrations</h3>
+                        <p>Connect your inventory system with:</p>
+                        <ul>
+                            <li><strong>E-commerce Platforms:</strong> Sync stock across Shopify, WooCommerce, Amazon</li>
+                            <li><strong>Accounting Software:</strong> Auto-update COGS, asset values in QuickBooks/Xero</li>
+                            <li><strong>Shipping Carriers:</strong> Generate labels, track shipments in one place</li>
+                            <li><strong>Point of Sale:</strong> Real-time inventory updates from retail locations</li>
+                            <li><strong>CRM Systems:</strong> Share customer purchase history and preferences</li>
+                            <li><strong>Analytics Tools:</strong> Feed data to business intelligence platforms</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>💰 ROI of Automation</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-title">70% Less Time</div>
+                                <p class="step-desc">Spent on manual counting and data entry</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">40% Reduction</div>
+                                <p class="step-desc">In carrying costs through optimization</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">95% Accuracy</div>
+                                <p class="step-desc">Eliminating human counting errors</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">25% Increase</div>
+                                <p class="step-desc">In sales through stockout prevention</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🚀 Implementation Roadmap</h3>
+                        <div class="highlight-box">
+                            <h4>Phase 1: Foundation (Month 1-2)</h4>
+                            <p>• Implement barcode scanning<br>• Set up automated reorder points<br>• Enable stock level alerts</p>
+                        </div>
+                        <div class="highlight-box">
+                            <h4>Phase 2: Integration (Month 3-4)</h4>
+                            <p>• Connect e-commerce platforms<br>• Link accounting software<br>• Integrate shipping carriers</p>
+                        </div>
+                        <div class="highlight-box">
+                            <h4>Phase 3: Intelligence (Month 5-6)</h4>
+                            <p>• Enable AI demand forecasting<br>• Implement automated reporting<br>• Set up anomaly detection</p>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>⚠️ Avoiding Common Pitfalls</h4>
+                        <ul style="margin-top: 10px;">
+                            <li>Don't automate broken processes—fix them first</li>
+                            <li>Start with high-impact, low-complexity automations</li>
+                            <li>Train staff thoroughly on new systems</li>
+                            <li>Maintain manual backup procedures</li>
+                            <li>Monitor automation performance regularly</li>
+                        </ul>
+                    </div>
+                `
+            },
+            course5: {
+                title: "Supply Chain & Logistics Integration",
+                subtitle: "Connecting inventory to your entire supply chain",
+                content: `
+                    <div class="section">
+                        <h3>🔗 The Connected Supply Chain</h3>
+                        <p>
+                            Your inventory doesn't exist in isolation. It's part of a complex network connecting suppliers, warehouses, transportation, and customers. Mastering these connections is key to operational excellence.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3>📦 Supplier Management</h3>
+                        <ul>
+                            <li><strong>Vendor Scorecarding:</strong> Rate suppliers on quality, delivery time, pricing, reliability</li>
+                            <li><strong>Lead Time Tracking:</strong> Monitor and optimize ordering schedules</li>
+                            <li><strong>Multi-Sourcing:</strong> Avoid dependency on single suppliers for critical items</li>
+                            <li><strong>Vendor-Managed Inventory (VMI):</strong> Let suppliers monitor and replenish stock</li>
+                            <li><strong>Contract Negotiation:</strong> Leverage volume for better terms and pricing</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 20px;">
+                            <h4>Supplier KPIs to Track</h4>
+                            <p>• On-Time Delivery Rate (target: >95%)<br>• Order Accuracy (target: >98%)<br>• Defect Rate (target: <2%)<br>• Response Time to inquiries<br>• Price Competitiveness</p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🚚 Shipping Optimization</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Carrier Selection</div>
+                                <p class="step-desc">Compare rates, speed, and reliability</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Route Planning</div>
+                                <p class="step-desc">Optimize delivery routes for efficiency</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Packaging</div>
+                                <p class="step-desc">Right-size boxes to reduce costs</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Tracking</div>
+                                <p class="step-desc">Provide real-time updates to customers</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🏭 Warehouse Network Design</h3>
+                        <p>Strategic placement of inventory across locations:</p>
+                        <ul>
+                            <li><strong>Centralized:</strong> One main warehouse—lower overhead, longer delivery times</li>
+                            <li><strong>Decentralized:</strong> Multiple regional warehouses—faster delivery, higher costs</li>
+                            <li><strong>Hybrid:</strong> Central warehouse + regional fulfillment centers for fast movers</li>
+                            <li><strong>3PL Partnership:</strong> Outsource warehousing to third-party logistics providers</li>
+                        </ul>
+                        <div class="highlight-box" style="margin-top: 20px;">
+                            <h4>Decision Factors</h4>
+                            <p>Consider: Customer locations, product types, delivery speed requirements, volume, budget constraints</p>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>📊 Supply Chain Visibility</h3>
+                        <ul>
+                            <li><strong>Order Tracking:</strong> Monitor every order from purchase to delivery</li>
+                            <li><strong>Inventory Visibility:</strong> Real-time view across all locations</li>
+                            <li><strong>Demand Signals:</strong> Share forecasts with suppliers for better planning</li>
+                            <li><strong>Exception Management:</strong> Alert systems for delays, shortages, quality issues</li>
+                            <li><strong>Performance Dashboards:</strong> One-view of entire supply chain health</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>🌱 Sustainable Logistics</h3>
+                        <p>Reduce environmental impact while cutting costs:</p>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-title">Route Optimization</div>
+                                <p class="step-desc">Reduce fuel consumption and emissions</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Consolidated Shipping</div>
+                                <p class="step-desc">Combine orders to minimize trips</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Eco-Friendly Packaging</div>
+                                <p class="step-desc">Recyclable, biodegradable materials</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Local Sourcing</div>
+                                <p class="step-desc">Reduce transportation distances</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>💡 Risk Management</h3>
+                        <div class="highlight-box">
+                            <h4>Mitigate Supply Chain Risks</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Diversify Suppliers:</strong> Avoid single points of failure</li>
+                                <li><strong>Safety Stock:</strong> Buffer against delays and disruptions</li>
+                                <li><strong>Insurance:</strong> Protect high-value shipments</li>
+                                <li><strong>Alternative Routes:</strong> Have backup shipping options</li>
+                                <li><strong>Contract Clauses:</strong> Include penalty provisions for delays</li>
+                                <li><strong>Regular Audits:</strong> Verify supplier capabilities and compliance</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🎯 Success Metrics</h4>
+                        <p><strong>Order Fill Rate:</strong> % of orders fulfilled completely (target: >95%)</p>
+                        <p><strong>On-Time Delivery:</strong> % delivered by promised date (target: >98%)</p>
+                        <p><strong>Perfect Order Rate:</strong> Complete, on-time, damage-free (target: >90%)</p>
+                        <p><strong>Supply Chain Cost:</strong> As % of revenue (benchmark: 8-15%)</p>
+                        <p><strong>Cash-to-Cash Cycle:</strong> Days from paying suppliers to customer payment (target: <30 days)</p>
+                    </div>
+                `
+            },
+            course6: {
+                title: "Scaling Your Inventory Operations",
+                subtitle: "Strategies for sustainable growth",
+                content: `
+                    <div class="section">
+                        <h3>🚀 Preparing for Scale</h3>
+                        <p>
+                            Scaling inventory operations requires more than just handling higher volumes. It demands robust systems, streamlined processes, and strategic planning to maintain efficiency as you grow.
+                        </p>
+                    </div>
+
+                    <div class="section">
+                        <h3>📈 Signs You're Ready to Scale</h3>
+                        <ul>
+                            <li>Consistent month-over-month revenue growth (20%+)</li>
+                            <li>Current systems causing bottlenecks or errors</li>
+                            <li>Expanding to new markets or product lines</li>
+                            <li>Adding new sales channels (online, retail, wholesale)</li>
+                            <li>Strong cash flow and working capital</li>
+                            <li>Team capacity stretched at current volumes</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>🏗️ Building Scalable Infrastructure</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Cloud Systems</div>
+                                <p class="step-desc">Move to cloud-based inventory software</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Process Documentation</div>
+                                <p class="step-desc">Create SOPs for all operations</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Team Expansion</div>
+                                <p class="step-desc">Hire ahead of demand curves</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-number">4</div>
+                                <div class="step-title">Technology Stack</div>
+                                <p class="step-desc">Invest in automation tools</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🌍 Multi-Location Management</h3>
+                        <p>Strategies for managing inventory across multiple warehouses:</p>
+                        <div class="highlight-box">
+                            <h4>Inventory Allocation Methods</h4>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Regional Allocation:</strong> Stock based on regional demand patterns</li>
+                                <li><strong>ABC by Location:</strong> Each location stocks its high-velocity items</li>
+                                <li><strong>Hub & Spoke:</strong> Central hub stocks everything, regional centers stock fast movers</li>
+                                <li><strong>Dynamic Allocation:</strong> AI-powered real-time redistribution</li>
+                            </ul>
+                        </div>
+                        <ul style="margin-top: 20px;">
+                            <li><strong>Transfer Optimization:</strong> Move stock between locations to prevent stockouts</li>
+                            <li><strong>Unified View:</strong> Single dashboard showing all locations</li>
+                            <li><strong>Local Autonomy:</strong> Give location managers decision-making power</li>
+                            <li><strong>Standardization:</strong> Same processes and systems everywhere</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>📊 Advanced Analytics</h3>
+                        <p>Leverage data science for strategic decisions:</p>
+                        <ul>
+                            <li><strong>Predictive Analytics:</strong> ML models for demand forecasting</li>
+                            <li><strong>Customer Segmentation:</strong> Tailor inventory to customer profiles</li>
+                            <li><strong>Product Lifecycle Analysis:</strong> Manage introduction, growth, decline phases</li>
+                            <li><strong>Cannibalization Studies:</strong> Understand how new products affect existing sales</li>
+                            <li><strong>Price Elasticity:</strong> Model how price changes affect demand</li>
+                            <li><strong>Market Basket Analysis:</strong> Identify products frequently bought together</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>💼 Financial Considerations</h3>
+                        <div class="steps-grid">
+                            <div class="step-card">
+                                <div class="step-title">Working Capital</div>
+                                <p class="step-desc">More inventory requires more cash</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Inventory Financing</div>
+                                <p class="step-desc">Use inventory as collateral for loans</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Payment Terms</div>
+                                <p class="step-desc">Negotiate longer supplier payment periods</p>
+                            </div>
+                            <div class="step-card">
+                                <div class="step-title">Cost Control</div>
+                                <p class="step-desc">Monitor costs as % of revenue</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>👥 Building Your Team</h3>
+                        <p>Key roles needed for scaling:</p>
+                        <div class="highlight-box">
+                            <ul>
+                                <li><strong>Inventory Manager:</strong> Overall strategy and optimization</li>
+                                <li><strong>Demand Planner:</strong> Forecasting and purchasing decisions</li>
+                                <li><strong>Warehouse Manager(s):</strong> Daily operations at each location</li>
+                                <li><strong>Data Analyst:</strong> Reporting and insights generation</li>
+                                <li><strong>Systems Administrator:</strong> Manage technology stack</li>
+                                <li><strong>Quality Control:</strong> Ensure inventory accuracy and product quality</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>⚡ Automation at Scale</h3>
+                        <ul>
+                            <li><strong>Warehouse Automation:</strong> Conveyors, sorters, automated storage/retrieval</li>
+                            <li><strong>Robotic Picking:</strong> Automated order fulfillment systems</li>
+                            <li><strong>AI Replenishment:</strong> Auto-generate purchase orders</li>
+                            <li><strong>Demand Sensing:</strong> Real-time demand signal processing</li>
+                            <li><strong>Blockchain:</strong> Supply chain traceability and transparency</li>
+                        </ul>
+                    </div>
+
+                    <div class="section">
+                        <h3>🎯 Growth Checklist</h3>
+                        <div class="highlight-box">
+                            <h4>Before Scaling</h4>
+                            <p>✓ Current processes optimized and documented</p>
+                            <p>✓ Technology can handle 3x current volume</p>
+                            <p>✓ 6 months of working capital secured</p>
+                            <p>✓ Team trained and ready to expand</p>
+                            <p>✓ Supplier relationships strong and contracts in place</p>
+                            <p>✓ KPIs tracked and targets set</p>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <h4>🏆 Scaling Success Factors</h4>
+                        <p><strong>1. Maintain Discipline:</strong> Don't sacrifice processes for speed</p>
+                        <p><strong>2. Invest in People:</strong> Train and empower your team</p>
+                        <p><strong>3. Stay Agile:</strong> Be ready to pivot as you learn</p>
+                        <p><strong>4. Focus on Cash:</strong> Manage working capital carefully</p>
+                        <p><strong>5. Use Data:</strong> Let metrics guide decisions, not gut feel</p>
+                    </div>
+                `
+            }
+        };
+
+        function openModal(courseId) {
+            const modal = document.getElementById('courseModal');
+            const course = courseContent[courseId];
+            
+            document.getElementById('modalTitle').textContent = course.title;
+            document.getElementById('modalSubtitle').textContent = course.subtitle;
+            document.getElementById('modalBody').innerHTML = course.content;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            feather.replace();
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'courseModal' || event.type === 'click') {
+                const modal = document.getElementById('courseModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

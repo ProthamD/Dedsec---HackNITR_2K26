@@ -4,6 +4,7 @@ const path = require("path");
 require("dotenv").config();
 const cors = require("cors");
 const Inventory = require("./models/Inventory");
+const AgentMemory = require("./models/AgentMemory");
 const https = require('https');
 
 // ShipEngine API helper function
@@ -726,6 +727,11 @@ app.get("/alert", async (req, res) => {
     }
 });
 
+// Route for courses page
+app.get("/courses", (req, res) => {
+    res.render("courses");
+});
+
 // API: Analyze disasters and show necessary products by warehouse
 app.post("/api/analyze-disaster", async (req, res) => {
     const { userId } = req.body;
@@ -878,6 +884,398 @@ app.post("/api/generate-waste-plans", async (req, res) => {
                 }
             ]
         });
+    }
+});
+
+// ============= WAREHOUSE NETWORK COMMUNICATION ROUTES =============
+
+// In-memory storage for requests and transfers (use MongoDB in production)
+let warehouseRequests = [];
+let warehouseTransfers = [];
+
+// API: Get excess stock available for transfer
+app.get("/api/warehouse-excess-stock", async (req, res) => {
+    try {
+        const userId = 'user123';
+        const inventory = await Inventory.find({ userId }).lean();
+        
+        // Find items with excess stock (more than 30 days supply)
+        const excessItems = inventory
+            .filter(item => {
+                const daysOfCover = item.onHand / (item.velocity || 1);
+                return daysOfCover > 30 && item.onHand > 20; // Overstock threshold
+            })
+            .map(item => ({
+                sku: item.sku,
+                productName: item.productName,
+                availableQuantity: Math.floor(item.onHand * 0.5), // 50% available for transfer
+                reason: 'Overstock',
+                warehouse: 'wh-boston' // Mock warehouse
+            }))
+            .slice(0, 10); // Limit to top 10
+        
+        res.json({
+            success: true,
+            excessItems
+        });
+    } catch (error) {
+        console.error("Excess stock API error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Create stock request
+app.post("/api/warehouse-request", async (req, res) => {
+    try {
+        const { product, quantity, requestingWarehouse, userId } = req.body;
+        
+        const request = {
+            id: `req-${Date.now()}`,
+            product,
+            quantity,
+            requestingWarehouse,
+            status: 'pending',
+            createdAt: new Date(),
+            userId
+        };
+        
+        warehouseRequests.push(request);
+        
+        res.json({
+            success: true,
+            message: 'Request created successfully',
+            request
+        });
+    } catch (error) {
+        console.error("Create request error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Get all stock requests
+app.get("/api/warehouse-requests", (req, res) => {
+    try {
+        // Return only active requests (not fulfilled)
+        const activeRequests = warehouseRequests
+            .filter(req => req.status === 'pending')
+            .slice(-10); // Last 10 requests
+        
+        res.json({
+            success: true,
+            requests: activeRequests
+        });
+    } catch (error) {
+        console.error("Get requests error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Fulfill a stock request
+app.post("/api/warehouse-request/:requestId/fulfill", (req, res) => {
+    try {
+        const { requestId } = req.params;
+        
+        const request = warehouseRequests.find(r => r.id === requestId);
+        
+        if (!request) {
+            return res.status(404).json({ success: false, message: 'Request not found' });
+        }
+        
+        // Mark as fulfilled
+        request.status = 'fulfilled';
+        request.fulfilledAt = new Date();
+        
+        // Create transfer record
+        const transfer = {
+            id: `transfer-${Date.now()}`,
+            product: request.product,
+            quantity: request.quantity,
+            fromWarehouse: 'wh-boston', // Mock source
+            toWarehouse: request.requestingWarehouse,
+            status: 'in-transit',
+            date: new Date()
+        };
+        
+        warehouseTransfers.push(transfer);
+        
+        res.json({
+            success: true,
+            message: 'Request fulfilled',
+            transfer
+        });
+    } catch (error) {
+        console.error("Fulfill request error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Initiate warehouse transfer
+app.post("/api/warehouse-transfer", async (req, res) => {
+    try {
+        const { sku, quantity, fromWarehouse, toWarehouse, userId } = req.body;
+        
+        // Find the product
+        const product = await Inventory.findOne({ sku, userId }).lean();
+        
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+        
+        const transfer = {
+            id: `transfer-${Date.now()}`,
+            product: product.productName,
+            sku,
+            quantity,
+            fromWarehouse,
+            toWarehouse,
+            status: 'in-transit',
+            date: new Date()
+        };
+        
+        warehouseTransfers.push(transfer);
+        
+        res.json({
+            success: true,
+            message: 'Transfer initiated',
+            transfer
+        });
+    } catch (error) {
+        console.error("Transfer error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Get transfer history
+app.get("/api/warehouse-transfers", (req, res) => {
+    try {
+        // Return last 20 transfers
+        const recentTransfers = warehouseTransfers
+            .slice(-20)
+            .reverse(); // Most recent first
+        
+        res.json({
+            success: true,
+            transfers: recentTransfers
+        });
+    } catch (error) {
+        console.error("Get transfers error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================
+// AGENT MEMORY SYSTEM - API ROUTES
+// ============================================
+
+// API: Query agent memories
+app.get("/api/agent-memory/query", async (req, res) => {
+    try {
+        const { userId, agentType, tags, outcome, limit = 10 } = req.query;
+        
+        // Build query
+        const query = {};
+        if (userId) query.userId = userId;
+        if (agentType) query.agentType = agentType;
+        if (outcome) query.outcome = outcome;
+        if (tags) {
+            const tagArray = Array.isArray(tags) ? tags : tags.split(',');
+            query.tags = { $in: tagArray };
+        }
+        
+        // Query memories, sorted by most recent
+        const memories = await AgentMemory.find(query)
+            .sort({ createdAt: -1 })
+            .limit(parseInt(limit));
+        
+        // Calculate summary stats
+        const total = await AgentMemory.countDocuments(query);
+        const successCount = memories.filter(m => m.outcome === 'success').length;
+        const failureCount = memories.filter(m => m.outcome === 'failure').length;
+        
+        res.json({
+            success: true,
+            memories: memories.map(m => ({
+                id: m._id,
+                agentType: m.agentType,
+                decision: m.decision,
+                context: m.context,
+                action: m.action,
+                outcome: m.outcome,
+                metrics: m.metrics,
+                learnings: m.learnings,
+                tags: m.tags,
+                createdAt: m.createdAt
+            })),
+            summary: {
+                total,
+                returned: memories.length,
+                successCount,
+                failureCount,
+                successRate: memories.length > 0 ? (successCount / memories.length * 100).toFixed(1) : 0
+            }
+        });
+    } catch (error) {
+        console.error("Query memory error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Store agent memory
+app.post("/api/agent-memory/store", async (req, res) => {
+    try {
+        const {
+            userId = 'system',
+            agentType,
+            decision,
+            context,
+            action,
+            outcome,
+            metrics,
+            learnings,
+            tags
+        } = req.body;
+        
+        // Validate required fields
+        if (!agentType || !decision || !context || !action || !outcome) {
+            return res.status(400).json({
+                success: false,
+                error: 'Missing required fields: agentType, decision, context, action, outcome'
+            });
+        }
+        
+        // Create new memory
+        const memory = new AgentMemory({
+            userId,
+            agentType,
+            decision,
+            context,
+            action,
+            outcome,
+            metrics: metrics || {},
+            learnings: learnings || '',
+            tags: tags || []
+        });
+        
+        await memory.save();
+        
+        res.json({
+            success: true,
+            message: 'Memory stored successfully',
+            memoryId: memory._id,
+            memory: {
+                id: memory._id,
+                agentType: memory.agentType,
+                decision: memory.decision,
+                outcome: memory.outcome,
+                createdAt: memory.createdAt
+            }
+        });
+    } catch (error) {
+        console.error("Store memory error:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// API: Analyze memory patterns
+app.get("/api/agent-memory/analyze", async (req, res) => {
+    try {
+        const { userId, agentType, timeRange = '30days' } = req.query;
+        
+        // Calculate date range
+        const now = new Date();
+        const ranges = {
+            '7days': 7,
+            '30days': 30,
+            '90days': 90,
+            'all': 3650 // ~10 years
+        };
+        const days = ranges[timeRange] || 30;
+        const startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+        
+        // Build query
+        const query = { createdAt: { $gte: startDate } };
+        if (userId) query.userId = userId;
+        if (agentType) query.agentType = agentType;
+        
+        // Get all memories in range
+        const memories = await AgentMemory.find(query).sort({ createdAt: -1 });
+        
+        // Analyze patterns
+        const analysis = {
+            timeRange,
+            totalMemories: memories.length,
+            outcomeBreakdown: {
+                success: memories.filter(m => m.outcome === 'success').length,
+                failure: memories.filter(m => m.outcome === 'failure').length,
+                partial: memories.filter(m => m.outcome === 'partial').length,
+                pending: memories.filter(m => m.outcome === 'pending').length
+            },
+            successRate: memories.length > 0 
+                ? (memories.filter(m => m.outcome === 'success').length / memories.length * 100).toFixed(1)
+                : 0,
+            commonTags: {},
+            avgMetrics: {
+                cost: 0,
+                timeElapsed: 0,
+                accuracy: 0
+            },
+            successfulPatterns: [],
+            failurePatterns: []
+        };
+        
+        // Calculate common tags
+        memories.forEach(m => {
+            m.tags.forEach(tag => {
+                analysis.commonTags[tag] = (analysis.commonTags[tag] || 0) + 1;
+            });
+        });
+        
+        // Calculate average metrics
+        let metricsCount = 0;
+        let totalCost = 0, totalTime = 0, totalAccuracy = 0;
+        memories.forEach(m => {
+            if (m.metrics) {
+                if (m.metrics.cost) {
+                    totalCost += m.metrics.cost;
+                    metricsCount++;
+                }
+                if (m.metrics.timeElapsed) totalTime += m.metrics.timeElapsed;
+                if (m.metrics.accuracy) totalAccuracy += m.metrics.accuracy;
+            }
+        });
+        if (metricsCount > 0) {
+            analysis.avgMetrics.cost = (totalCost / metricsCount).toFixed(2);
+            analysis.avgMetrics.timeElapsed = (totalTime / metricsCount).toFixed(2);
+            analysis.avgMetrics.accuracy = (totalAccuracy / metricsCount).toFixed(1);
+        }
+        
+        // Extract successful patterns
+        const successMemories = memories.filter(m => m.outcome === 'success');
+        analysis.successfulPatterns = successMemories.slice(0, 5).map(m => ({
+            decision: m.decision,
+            action: m.action,
+            learnings: m.learnings,
+            tags: m.tags,
+            date: m.createdAt
+        }));
+        
+        // Extract failure patterns
+        const failureMemories = memories.filter(m => m.outcome === 'failure');
+        analysis.failurePatterns = failureMemories.slice(0, 5).map(m => ({
+            decision: m.decision,
+            action: m.action,
+            learnings: m.learnings,
+            tags: m.tags,
+            date: m.createdAt
+        }));
+        
+        res.json({
+            success: true,
+            analysis
+        });
+    } catch (error) {
+        console.error("Analyze memory error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 

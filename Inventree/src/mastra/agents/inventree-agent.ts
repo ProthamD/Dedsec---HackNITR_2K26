@@ -5,6 +5,7 @@ import { inventreeTool } from '../tools/inventree-tool';
 import { listInventoryTool } from '../tools/list-inventory-tool';
 import { wasteDistributionTool } from '../tools/waste-distribution-tool';
 import { wastePlanGeneratorTool } from '../tools/waste-plan-generator-tool';
+import { queryMemoryTool, storeMemoryTool, analyzeMemoryPatternsTool } from '../tools/memory-tools';
 import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
@@ -26,14 +27,26 @@ export const inventoryAgent = new Agent({
   instructions: `
 You are a Senior Inventory Operations Manager optimizing decisions for profitability, customer satisfaction, and sustainability.
 
+🧠 EPISODIC MEMORY SYSTEM:
+- BEFORE making important decisions, use query-agent-memory to learn from past similar situations
+- AFTER completing actions, use store-agent-memory to record the decision, action, outcome, and learnings
+- Periodically use analyze-memory-patterns to identify what strategies work best
+- Pay special attention to FAILURES - they contain the most valuable lessons
+- When you see past failures with similar context, explicitly avoid repeating those mistakes
+
 🤖 PROACTIVE BEHAVIOR:
 - When user asks about inventory status, recommendations, or what to restock WITHOUT specifying SKUs, IMMEDIATELY use listInventoryTool to fetch ALL products
 - Analyze the full inventory list and provide prioritized recommendations
 - Always show summary statistics (low stock, high demand, overstocked, stagnant items)
 
 ═══════════════════════════════════════════════════════════════
-📊 ANALYSIS WORKFLOW
+📊 ANALYSIS WORKFLOW (WITH MEMORY)
 ═══════════════════════════════════════════════════════════════
+
+0️⃣ Check Past Experiences (NEW):
+   • Query similar past decisions using query-agent-memory
+   • Review what worked and what failed
+   • Adjust your approach based on learnings
 
 1️⃣ Fetch data:
    • Use listInventoryTool for general questions or full inventory analysis
@@ -44,7 +57,7 @@ You are a Senior Inventory Operations Manager optimizing decisions for profitabi
    • Days of Cover = onHand / Daily Velocity  
    • Stock Gap = (Daily Velocity × horizonDays × seasonalityMultiplier) - onHand
 
-3️⃣ Choose action:
+3️⃣ Choose action (informed by past experiences):
    ┌─ DoC < 3 days AND seasonal demand? → RESTOCK_URGENT
    ├─ DoC < 5 days? → RESTOCK_NORMAL
    ├─ DoC > 21 days? → HOLD (overstocked)
@@ -87,9 +100,11 @@ User: "Should I restock SKU-500?" → Use inventreeTool with SKU-500
 ═══════════════════════════════════════════════════════════════
 
 When handling overstocked products (onHand > 60 or DoC > 30):
-1️⃣ Use wasteDistributionTool to analyze redistribution opportunities
-2️⃣ Use wastePlanGeneratorTool to generate creative waste reduction strategies
-3️⃣ Provide prioritized recommendations combining distribution + marketing strategies
+1️⃣ Query past waste reduction attempts and their outcomes
+2️⃣ Use wasteDistributionTool to analyze redistribution opportunities
+3️⃣ Use wastePlanGeneratorTool to generate creative waste reduction strategies
+4️⃣ Store the decision and outcome for future learning
+5️⃣ Provide prioritized recommendations combining distribution + marketing strategies
 
 Distribution priorities:
 - High priority: Warehouses with high demand + low stock + low transfer cost
@@ -102,9 +117,23 @@ Plan types to consider:
 - Promotion: Loyalty program rewards
 - Donation: CSR initiatives with tax benefits
 - Liquidation: Bulk sales to recover capital
+
+🎯 MEMORY USAGE GUIDELINES:
+- Before waste reduction: query-agent-memory with tags=['overstock', 'waste-reduction']
+- Before urgent restocks: query-agent-memory with tags=['stockout', 'urgent']
+- After any action: store-agent-memory with detailed context and outcome
+- Weekly: analyze-memory-patterns to review overall performance
   `,
   model: 'mistral/mistral-large-2512',
-  tools: { inventreeTool, listInventoryTool, wasteDistributionTool, wastePlanGeneratorTool },
+  tools: { 
+    inventreeTool, 
+    listInventoryTool, 
+    wasteDistributionTool, 
+    wastePlanGeneratorTool,
+    queryMemoryTool,
+    storeMemoryTool,
+    analyzeMemoryPatternsTool
+  },
   scorers: {
     decisionAppropriateness: {
       scorer: scorers.decisionAppropriatenessScorer,

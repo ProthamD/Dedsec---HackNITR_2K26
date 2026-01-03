@@ -114,6 +114,17 @@
                         </div>
                     </button>
                 <% } %>
+
+                                    <button 
+                        onclick="handleIssue('courses')"
+                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(239, 68, 68, 0.5);">
+                        <i data-feather="zap" class="w-5 h-5" style="color: rgb(31, 217, 59);"></i>
+                        <div class="text-left">
+                            <div class="text-sm font-semibold">Courses</div>
+                            <div class="text-xs" style="color: var(--text-muted);">Critical items</div>
+                        </div>
+                    </button>
             </div>
         </div>
     </div>
@@ -130,6 +141,10 @@
             } else if (issueType === 'alert') {
                 console.log('Redirecting to /alert...');
                 window.location.href = '/alert';
+                return false;
+            } else if (issueType === 'courses') {
+                console.log('Redirecting to /courses...');
+                window.location.href = '/courses';
                 return false;
             } else {
                 // Placeholder for future functionality

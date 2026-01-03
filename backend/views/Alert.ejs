@@ -308,6 +308,9 @@
             padding: 12px;
             border-radius: 8px;
             animation: slideIn 0.3s ease;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         @keyframes slideIn {
@@ -573,7 +576,21 @@
                 });
 
                 const data = await response.json();
-                addMessageToChat(data.response || 'Sorry, I could not process your request.', 'ai');
+                console.log('Chat response data:', data);
+                
+                // Handle different response formats
+                let aiMessage = 'Sorry, I could not process your request.';
+                if (data.text) {
+                    aiMessage = data.text;
+                } else if (data.response) {
+                    aiMessage = data.response;
+                } else if (data.error) {
+                    aiMessage = `Error: ${data.message || data.error}`;
+                } else if (typeof data === 'string') {
+                    aiMessage = data;
+                }
+                
+                addMessageToChat(aiMessage, 'ai');
             } catch (error) {
                 console.error('Chat error:', error);
                 addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
@@ -586,7 +603,28 @@
             const messagesDiv = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = text;
+            
+            // Format the text for better readability
+            if (sender === 'ai') {
+                // Convert markdown-style formatting to HTML
+                let formatted = text
+                    // Headers
+                    .replace(/### (.*?)$/gm, '<strong style="font-size: 1.1em; display: block; margin: 10px 0 5px 0; color: var(--accent-green);">$1</strong>')
+                    .replace(/#### (.*?)$/gm, '<strong style="display: block; margin: 8px 0 4px 0;">$1</strong>')
+                    // Bold text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    // Bullet points
+                    .replace(/^- (.*?)$/gm, '• $1')
+                    // Line breaks
+                    .replace(/\n/g, '<br>')
+                    // Tables (basic support) - replace | with spaces for cleaner look
+                    .replace(/\|/g, ' | ');
+                    
+                messageDiv.innerHTML = formatted;
+            } else {
+                messageDiv.textContent = text;
+            }
+            
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }

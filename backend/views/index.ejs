@@ -117,10 +117,111 @@
             </div>
         </section>
 
+        <!-- Warehouse Communication Section -->
+        <section class="px-4 py-16" style="background: var(--bg-card); border-top: 1px solid var(--border);">
+            <div class="max-w-6xl mx-auto">
+                <!-- Section Header -->
+                <div class="mb-8 text-center">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: var(--text-primary);">
+                        🏭 Warehouse Network
+                    </h2>
+                    <p style="color: var(--text-muted);">
+                        Request or transfer inventory between warehouses to optimize stock levels
+                    </p>
+                </div>
+
+                <!-- Two Column Layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Request Stock Column -->
+                    <div class="rounded-xl p-6" style="background: var(--bg-primary); border: 1px solid var(--border);">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--accent-green);">
+                            <i data-feather="inbox" class="w-5 h-5"></i>
+                            Request Stock
+                        </h3>
+                        
+                        <!-- Request Form -->
+                        <div class="space-y-3 mb-6">
+                            <input 
+                                type="text" 
+                                id="requestProduct" 
+                                placeholder="Product SKU or Name"
+                                class="w-full px-4 py-2 rounded-lg text-sm focus:outline-none" 
+                                style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);"
+                            >
+                            <input 
+                                type="number" 
+                                id="requestQuantity" 
+                                placeholder="Quantity needed"
+                                min="1"
+                                class="w-full px-4 py-2 rounded-lg text-sm focus:outline-none" 
+                                style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);"
+                            >
+                            <select 
+                                id="requestWarehouse" 
+                                class="w-full px-4 py-2 rounded-lg text-sm focus:outline-none" 
+                                style="background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary);">
+                                <option value="">Select requesting warehouse</option>
+                                <option value="wh-boston">Boston Distribution Center</option>
+                                <option value="wh-atlanta">Atlanta Warehouse</option>
+                                <option value="wh-chicago">Chicago Hub</option>
+                                <option value="wh-dallas">Dallas Center</option>
+                                <option value="wh-la">Los Angeles Facility</option>
+                            </select>
+                            <button 
+                                onclick="createStockRequest()"
+                                class="w-full px-4 py-3 rounded-lg font-medium transition-all hover:scale-102"
+                                style="background: var(--accent-green); color: var(--bg-primary);">
+                                📨 Create Request
+                            </button>
+                        </div>
+
+                        <!-- Active Requests -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-semibold mb-2" style="color: var(--text-muted);">Active Requests</h4>
+                            <div id="activeRequests" class="space-y-2 max-h-[300px] overflow-y-auto">
+                                <div class="p-3 rounded-lg text-center" style="background: var(--bg-card); color: var(--text-muted); font-size: 0.85em;">
+                                    No active requests
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Available for Transfer Column -->
+                    <div class="rounded-xl p-6" style="background: var(--bg-primary); border: 1px solid var(--border);">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--accent-green);">
+                            <i data-feather="package" class="w-5 h-5"></i>
+                            Available for Transfer
+                        </h3>
+                        
+                        <!-- Excess Stock Items -->
+                        <div id="excessStock" class="space-y-2 max-h-[450px] overflow-y-auto">
+                            <div class="p-3 rounded-lg text-center" style="background: var(--bg-card); color: var(--text-muted); font-size: 0.85em;">
+                                Loading inventory...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transfer History -->
+                <div class="mt-6 rounded-xl p-6" style="background: var(--bg-primary); border: 1px solid var(--border);">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2" style="color: var(--text-primary);">
+                        <i data-feather="repeat" class="w-5 h-5"></i>
+                        Recent Transfers
+                    </h3>
+                    <div id="transferHistory" class="space-y-2 max-h-[200px] overflow-y-auto">
+                        <div class="p-3 rounded-lg text-center" style="background: var(--bg-card); color: var(--text-muted); font-size: 0.85em;">
+                            No transfer history
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Hidden input for userId -->
         <input type="hidden" id="userId" value="<%= userId %>">
     <% } %>
 
     <script src="/js/chat.js"></script>
+    <script src="/js/warehouse-network.js"></script>
 </body>
 </html>
