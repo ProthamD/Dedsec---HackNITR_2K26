@@ -24,19 +24,66 @@ app.get("/", async (req, res) => {
     
     try {
         // Query MongoDB for user's inventory
-        const inventoryCount = await Inventory.countDocuments({ userId });
+        const inventory = await Inventory.find({ userId }).lean();
+        const inventoryCount = inventory.length;
         const hasInventory = inventoryCount > 0;
+        
+        // Analyze inventory to detect issues for management center
+        const issues = {
+            reduceWaste: false,
+            alert: false,
+            changes: false,
+            action: false
+        };
+        
+        let issueCount = 0;
+        
+        if (hasInventory) {
+            inventory.forEach(item => {
+                // Check for overstocked items (waste reduction needed)
+                if (item.onHand > 60) {
+                    issues.reduceWaste = true;
+                }
+                
+                // Check for low stock alerts
+                if (item.onHand < 10) {
+                    issues.alert = true;
+                }
+                
+                // Check for items with high demand variability (changes needed)
+                if (item.demandHistory && item.demandHistory.length > 0) {
+                    const demands = item.demandHistory.map(d => d.unitsSold);
+                    const avg = demands.reduce((a, b) => a + b, 0) / demands.length;
+                    const variance = demands.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / demands.length;
+                    if (variance > 50) {
+                        issues.changes = true;
+                    }
+                }
+                
+                // Check for items needing immediate action (critical stock or budget issues)
+                if (item.onHand < 5 || (item.unitCost * item.moq > item.budgetCap)) {
+                    issues.action = true;
+                }
+            });
+            
+            // Count active issues
+            issueCount = Object.values(issues).filter(Boolean).length;
+        }
         
         res.render("index", { 
             hasInventory, 
-            inventoryCount, 
+            inventoryCount,
+            issues,
+            issueCount,
             userId 
         });
     } catch (error) {
         console.error("Error fetching inventory:", error);
         res.render("index", { 
             hasInventory: false, 
-            inventoryCount: 0, 
+            inventoryCount: 0,
+            issues: {},
+            issueCount: 0,
             userId 
         });
     }
@@ -127,6 +174,74 @@ app.post("/inventory/add", async (req, res) => {
     } catch (error) {
         console.error("Error adding inventory:", error);
         res.status(500).send("Error adding inventory: " + error.message);
+    }
+});
+
+// Management Center route
+app.get("/management", async (req, res) => {
+    // TODO: Get userId from session/auth
+    const userId = "user123";
+    
+    try {
+        // Get inventory data
+        const inventory = await Inventory.find({ userId }).lean();
+        const inventoryCount = inventory.length;
+        
+        // Analyze inventory to detect issues
+        const issues = {
+            reduceWaste: false,
+            alert: false,
+            changes: false,
+            action: false
+        };
+        
+        let issueCount = 0;
+        
+        // Check for issues in inventory
+        inventory.forEach(item => {
+            // Check for overstocked items (waste reduction needed)
+            if (item.onHand > 60) {
+                issues.reduceWaste = true;
+            }
+            
+            // Check for low stock alerts
+            if (item.onHand < 10) {
+                issues.alert = true;
+            }
+            
+            // Check for items with high demand variability (changes needed)
+            if (item.demandHistory && item.demandHistory.length > 0) {
+                const demands = item.demandHistory.map(d => d.unitsSold);
+                const avg = demands.reduce((a, b) => a + b, 0) / demands.length;
+                const variance = demands.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / demands.length;
+                if (variance > 50) {
+                    issues.changes = true;
+                }
+            }
+            
+            // Check for items needing immediate action (critical stock or budget issues)
+            if (item.onHand < 5 || (item.unitCost * item.moq > item.budgetCap)) {
+                issues.action = true;
+            }
+        });
+        
+        // Count active issues
+        issueCount = Object.values(issues).filter(Boolean).length;
+        
+        res.render("management", { 
+            issues,
+            issueCount,
+            inventoryCount,
+            userId 
+        });
+    } catch (error) {
+        console.error("Error loading management center:", error);
+        res.render("management", { 
+            issues: {},
+            issueCount: 0,
+            inventoryCount: 0,
+            userId 
+        });
     }
 });
 

@@ -1,0 +1,132 @@
+<!-- Management Center Section (Partial) -->
+<section class="px-4 py-16" style="background: var(--bg-primary);">
+    <div class="max-w-6xl mx-auto">
+        <!-- Section Header -->
+        <div class="mb-8">
+            <h2 class="text-2xl md:text-3xl font-bold mb-2" style="color: var(--text-primary);">
+                Management Center
+            </h2>
+            <p style="color: var(--text-muted);">
+                Monitor and control your inventory operations
+            </p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="rounded-xl p-6 transition-all" style="background: var(--bg-card); border: 1px solid var(--border);">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm mb-1" style="color: var(--text-muted);">Total Items</p>
+                        <p class="text-3xl font-bold" style="color: var(--text-primary);"><%= inventoryCount || 0 %></p>
+                    </div>
+                    <div class="p-3 rounded-lg" style="background: hsla(240, 4%, 16%, 1);">
+                        <svg class="w-5 h-5" style="color: var(--text-muted);" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm mt-2" style="color: var(--accent-green);">+12% from last month</p>
+            </div>
+
+            <div class="rounded-xl p-6 transition-all" style="background: var(--bg-card); border: 1px solid var(--border);">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm mb-1" style="color: var(--text-muted);">Active Issues</p>
+                        <p class="text-3xl font-bold" style="color: var(--text-primary);"><%= issueCount || 0 %></p>
+                    </div>
+                    <div class="p-3 rounded-lg" style="background: hsla(240, 4%, 16%, 1);">
+                        <svg class="w-5 h-5" style="color: var(--text-muted);" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-sm mt-2" style="color: var(--accent-green);">-5% from last week</p>
+            </div>
+
+            <div class="rounded-xl p-6 transition-all" style="background: var(--bg-card); border: 1px solid var(--border);">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-sm mb-1" style="color: var(--text-muted);">Automation</p>
+                        <p class="text-3xl font-bold" style="color: var(--text-primary);">AI</p>
+                    </div>
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full" style="background: hsla(142, 70%, 45%, 0.1);">
+                        <span class="font-semibold" style="color: var(--accent-green);">AI</span>
+                    </div>
+                </div>
+                <p class="text-sm mt-2" style="color: var(--text-muted);">Automation Ready</p>
+            </div>
+        </div>
+
+        <!-- Important Action Buttons (Below Stats) -->
+        <div class="mt-8 rounded-2xl p-6" style="background: var(--bg-card); border: 1px solid var(--border);">
+            <h3 class="text-lg font-semibold mb-5 flex items-center gap-2" style="color: var(--text-primary);">
+                <span>⚡</span> Quick Actions
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <% if (issues && issues.reduceWaste) { %>
+                    <button 
+                        onclick="handleIssue('reduceWaste')"
+                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid var(--border);">
+                        <i data-feather="trash-2" class="w-5 h-5" style="color: var(--accent-green);"></i>
+                        <div class="text-left">
+                            <div class="text-sm font-semibold">Reduce Waste</div>
+                            <div class="text-xs" style="color: var(--text-muted);">Optimize stock levels</div>
+                        </div>
+                    </button>
+                <% } %>
+
+                <% if (issues && issues.alert) { %>
+                    <button 
+                        onclick="handleIssue('alert')"
+                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(234, 179, 8, 0.5);">
+                        <i data-feather="alert-triangle" class="w-5 h-5" style="color: rgb(234, 179, 8);"></i>
+                        <div class="text-left">
+                            <div class="text-sm font-semibold">Alert!</div>
+                            <div class="text-xs" style="color: var(--text-muted);">Low stock warning</div>
+                        </div>
+                    </button>
+                <% } %>
+
+                <% if (issues && issues.changes) { %>
+                    <button 
+                        onclick="handleIssue('changes')"
+                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(59, 130, 246, 0.5);">
+                        <i data-feather="refresh-cw" class="w-5 h-5" style="color: rgb(59, 130, 246);"></i>
+                        <div class="text-left">
+                            <div class="text-sm font-semibold">Changes</div>
+                            <div class="text-xs" style="color: var(--text-muted);">Demand volatility</div>
+                        </div>
+                    </button>
+                <% } %>
+
+                <% if (issues && issues.action) { %>
+                    <button 
+                        onclick="handleIssue('action')"
+                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(239, 68, 68, 0.5);">
+                        <i data-feather="zap" class="w-5 h-5" style="color: rgb(239, 68, 68);"></i>
+                        <div class="text-left">
+                            <div class="text-sm font-semibold">Action Required</div>
+                            <div class="text-xs" style="color: var(--text-muted);">Critical items</div>
+                        </div>
+                    </button>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleIssue(issueType) {
+            console.log('Issue clicked:', issueType);
+            // Placeholder for future functionality
+            alert(`${issueType} button clicked - functionality coming soon!`);
+        }
+        // Initialize Feather Icons
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    </script>
+</section>

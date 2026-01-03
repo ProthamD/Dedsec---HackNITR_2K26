@@ -5,95 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventree - AI Inventory Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+            --chat-user: hsl(240, 4%, 18%);
+            --chat-ai: hsl(240, 5%, 14%);
+        }
+        body { background: var(--bg-primary); color: var(--text-primary); }
+        .gradient-mesh {
+            background: radial-gradient(at 40% 20%, hsla(142, 70%, 45%, 0.1) 0px, transparent 50%),
+                        radial-gradient(at 80% 0%, hsla(240, 5%, 20%, 0.5) 0px, transparent 50%),
+                        radial-gradient(at 0% 50%, hsla(142, 70%, 45%, 0.05) 0px, transparent 50%);
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center p-6">
-    <div class="w-full max-w-5xl">
-        <!-- Header -->
-        <div class="text-center mb-6 text-white animate-fade-in">
-            <h1 class="text-6xl font-extrabold mb-3 drop-shadow-2xl tracking-tight">
-                🤖 Inventree AI
-            </h1>
-            <p class="text-xl opacity-90 font-light">Your Intelligent Inventory Assistant</p>
-        </div>
-        
-        <% if (!hasInventory) { %>
-            <!-- No Inventory State -->
-            <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-16 text-center transform hover:scale-105 transition-transform duration-300">
-                <div class="text-7xl mb-6">📦</div>
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">No Inventory Data Found</h2>
-                <p class="text-gray-600 text-lg mb-8">Please add inventory items to start using the AI assistant.</p>
-                <a href="/inventory/add" class="inline-block bg-gradient-to-r from-purple-600 to-blue-500 text-white px-10 py-4 rounded-full font-semibold hover:shadow-2xl transition-all duration-200 hover:scale-110">
+<body class="min-h-screen">
+    <% if (!hasInventory) { %>
+        <!-- No Inventory State -->
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="text-center">
+                <div class="text-6xl mb-4">📦</div>
+                <h2 class="text-2xl font-semibold mb-2" style="color: var(--text-primary);">No Inventory Data</h2>
+                <p class="mb-6" style="color: var(--text-muted);">Add inventory items to get started</p>
+                <a href="/inventory/add" class="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-colors" style="background: var(--accent-green); color: var(--text-primary);">
                     Add Inventory
                 </a>
             </div>
-        <% } else { %>
-            <!-- Chat Interface -->
-            <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20">
-                <!-- Inventory Info Bar -->
-                <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-4 flex justify-between items-center">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span class="font-semibold text-lg">📊 <%= inventoryCount %> Products</span>
-                    </div>
-                    <span class="text-sm opacity-90 bg-white/20 px-4 py-1 rounded-full">🆔 <%= userId %></span>
+        </div>
+    <% } else { %>
+        <!-- Hero Header -->
+        <section class="flex flex-col items-center justify-center px-4 py-12 gradient-mesh relative">
+            <!-- Background Decoration -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl" style="background: hsla(142, 70%, 45%, 0.05);"></div>
+                <div class="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl" style="background: hsla(142, 70%, 45%, 0.03);"></div>
+            </div>
+
+            <!-- Header -->
+            <div class="text-center relative z-10">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-4">
+                    <span style="color: var(--text-primary);">Inven</span><span style="color: var(--accent-green);">tree</span>
+                </h1>
+                <p class="text-xl md:text-2xl mb-6" style="color: var(--text-muted);">
+                    Inventory Management
+                </p>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full" style="background: hsla(240, 5%, 12%, 0.5); border: 1px solid var(--border);">
+                    <span class="text-sm" style="color: var(--accent-green);">✨</span>
+                    <span class="text-sm" style="color: var(--text-muted);">AI-Powered Assistant</span>
                 </div>
-                
-                <!-- Chat Messages -->
-                <div id="chatMessages" class="h-[550px] overflow-y-auto p-8 space-y-4 bg-black">
-                    <!-- Bot Welcome Message -->
-                    <div class="flex justify-start animate-slide-in">
-                        <div class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white rounded-3xl rounded-tl-md px-7 py-5 max-w-[85%] shadow-xl">
-                            <p class="leading-relaxed text-base">
-                                👋 <strong>Hi there!</strong> I'm your Inventree AI assistant.<br><br>
-                                I can help you with:<br>
-                                <span class="inline-block mt-2">
-                                    ✨ Inventory restocking decisions<br>
-                                    📈 Demand forecasting & analytics<br>
-                                    📊 Real-time stock analysis<br>
-                                    💡 Cost optimization strategies
-                                </span>
-                                <br><br>
-                                <em class="opacity-90">What would you like to know?</em>
-                            </p>
+            </div>
+        </section>
+
+        <!-- Management Center Section -->
+        <% if (hasInventory) { %>
+            <%- include('management', { issues: issues, issueCount: issueCount, inventoryCount: inventoryCount }) %>
+        <% } %>
+
+        <!-- Chat Section -->
+        <section class="flex flex-col items-center justify-center px-4 py-8" style="border-top: 1px solid var(--border);">
+            <!-- Chat Container -->
+            <div class="w-full max-w-3xl relative z-10">
+                <div class="rounded-2xl shadow-2xl overflow-hidden" style="background: hsla(240, 5%, 12%, 0.8); backdrop-filter: blur(24px); border: 1px solid var(--border);">
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="h-[300px] overflow-y-auto p-6 space-y-4">
+                        <!-- Bot Welcome Message -->
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background: var(--chat-ai);">
+                                <svg class="w-4 h-4" style="color: var(--text-muted);" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 7H7v6h6V7z"/>
+                                    <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="px-4 py-3 rounded-2xl rounded-bl-md max-w-[80%]" style="background: var(--chat-ai);">
+                                <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+                                    Hello! I'm your Inventory AI Assistant. I can help you manage stock levels, track items, reduce waste, and automate inventory tasks. What would you like to do today?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-4" style="border-top: 1px solid var(--border);">
+                        <div class="flex gap-3">
+                            <input 
+                                type="text" 
+                                id="messageInput" 
+                                placeholder="Ask about inventory, stock levels, or automation..."
+                                onkeypress="handleKeyPress(event)"
+                                class="flex-1 px-4 py-3 rounded-lg text-sm focus:outline-none" 
+                                style="background: hsla(240, 5%, 12%, 0.5); border: 1px solid var(--border); color: var(--text-primary);"
+                            >
+                            <button 
+                                onclick="sendMessage()" 
+                                id="sendBtn"
+                                class="p-3 rounded-lg transition-all"
+                                style="background: var(--accent-green); color: var(--text-primary); box-shadow: 0 0 20px hsla(142, 70%, 45%, 0.3);"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Chat Input -->
-                <div class="border-t border-gray-200 p-6 bg-white">
-                    <div class="flex gap-4">
-                        <input 
-                            type="text" 
-                            id="messageInput" 
-                            placeholder="Ask me anything about your inventory..."
-                            onkeypress="handleKeyPress(event)"
-                            class="flex-1 px-7 py-4 border-2 border-gray-600 bg-gray-700 text-white rounded-full focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all duration-200 text-base placeholder-gray-400"
-                        >
-                        <button 
-                            onclick="sendMessage()" 
-                            id="sendBtn"
-                            class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-10 py-4 rounded-full font-bold hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95"
-                        >
-                            <span class="flex items-center gap-2">
-                                Send
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                                </svg>
-                            </span>
-                        </button>
-
-                                        <a href="/inventory/add" class="inline-block bg-gradient-to-r from-purple-600 to-blue-500 text-white px-10 py-4 rounded-full font-semibold hover:shadow-2xl transition-all duration-200 hover:scale-110">
-                    Add Inventory
-                </a>
-                </div>
             </div>
-            
-            <!-- Hidden input for userId -->
-            <input type="hidden" id="userId" value="<%= userId %>">
-        <% } %>
+        </section>
 
-
-    </div>
+        <!-- Hidden input for userId -->
+        <input type="hidden" id="userId" value="<%= userId %>">
+    <% } %>
 
     <script src="/js/chat.js"></script>
 </body>

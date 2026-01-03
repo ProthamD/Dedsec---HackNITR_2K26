@@ -78,27 +78,54 @@ async function sendMessage() {
 
 function addMessage(text, sender) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = sender === 'user' ? 'flex justify-end animate-slide-in' : 'flex justify-start animate-slide-in';
     
-    const bubbleClass = sender === 'user' 
-        ? 'bg-gradient-to-br from-gray-700 to-gray-800 text-white rounded-3xl rounded-tr-md px-7 py-5 max-w-[85%] shadow-xl border border-gray-600'
-        : 'bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 text-white rounded-3xl rounded-tl-md px-7 py-5 max-w-[85%] shadow-xl border border-gray-700';
+    if (sender === 'user') {
+        messageDiv.className = 'flex gap-3 flex-row-reverse';
+        messageDiv.innerHTML = `
+            <div style="width: 32px; height: 32px; background: hsl(240, 4%, 18%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg style="width: 16px; height: 16px; color: hsl(0, 0%, 98%);" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div style="background: hsl(240, 4%, 18%); color: hsl(0, 0%, 98%); padding: 0.75rem 1rem; border-radius: 1rem; border-bottom-right-radius: 0.25rem; max-width: 80%;">
+                <p style="font-size: 0.875rem; line-height: 1.5;">${text}</p>
+            </div>
+        `;
+    } else {
+        messageDiv.className = 'flex gap-3';
+        messageDiv.innerHTML = `
+            <div style="width: 32px; height: 32px; background: hsl(240, 5%, 14%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg style="width: 16px; height: 16px; color: hsl(240, 5%, 64%);" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M13 7H7v6h6V7z"/>
+                    <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div style="background: hsl(240, 5%, 14%); color: hsl(0, 0%, 98%); padding: 0.75rem 1rem; border-radius: 1rem; border-bottom-left-radius: 0.25rem; max-width: 80%;">
+                <p style="font-size: 0.875rem; line-height: 1.5;">${text}</p>
+            </div>
+        `;
+    }
     
-    messageDiv.innerHTML = `<div class="${bubbleClass}"><p class="leading-relaxed text-base">${text}</p></div>`;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function showTypingIndicator() {
     const indicator = document.createElement('div');
-    indicator.className = 'flex justify-start animate-slide-in';
+    indicator.className = 'flex gap-3';
     indicator.id = 'typingIndicator';
     indicator.innerHTML = `
-        <div class="bg-gray-300/80 rounded-3xl rounded-tl-md px-7 py-5 shadow-lg">
-            <div class="flex gap-2">
-                <span class="w-3 h-3 bg-gray-600 rounded-full animate-bounce" style="animation-delay: 0s"></span>
-                <span class="w-3 h-3 bg-gray-600 rounded-full animate-bounce" style="animation-delay: 0.15s"></span>
-                <span class="w-3 h-3 bg-gray-600 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+        <div style="width: 32px; height: 32px; background: hsl(240, 5%, 14%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg style="width: 16px; height: 16px; color: hsl(240, 5%, 64%);" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 7H7v6h6V7z"/>
+                <path fill-rule="evenodd" d="M7 2a1 1 0 012 0v1h2V2a1 1 0 112 0v1h2a2 2 0 012 2v2h1a1 1 0 110 2h-1v2h1a1 1 0 110 2h-1v2a2 2 0 01-2 2h-2v1a1 1 0 11-2 0v-1H9v1a1 1 0 11-2 0v-1H5a2 2 0 01-2-2v-2H2a1 1 0 110-2h1V9H2a1 1 0 010-2h1V5a2 2 0 012-2h2V2zM5 5h10v10H5V5z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <div style="background: hsl(240, 5%, 14%); color: hsl(0, 0%, 98%); padding: 0.75rem 1rem; border-radius: 1rem; border-bottom-left-radius: 0.25rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <span style="width: 0.75rem; height: 0.75rem; background: hsl(240, 5%, 64%); border-radius: 9999px; animation: bounce 1s infinite; animation-delay: 0s;"></span>
+                <span style="width: 0.75rem; height: 0.75rem; background: hsl(240, 5%, 64%); border-radius: 9999px; animation: bounce 1s infinite; animation-delay: 0.15s;"></span>
+                <span style="width: 0.75rem; height: 0.75rem; background: hsl(240, 5%, 64%); border-radius: 9999px; animation: bounce 1s infinite; animation-delay: 0.3s;"></span>
             </div>
         </div>
     `;
