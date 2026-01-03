@@ -2,6 +2,7 @@ output.txt
 node_modules 
 dist 
 .mastra 
+.env.example
 .env.development 
 .env 
 *.db 
