@@ -1,6 +1,6 @@
 [
   {
-    "sku": "SKU-200",
+    "sku": "SKU-200", 
     "name": "Smartphone A",
     "location": "Main-Warehouse",
     "horizonDays": 21,

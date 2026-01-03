@@ -20,7 +20,7 @@ export const decisionAppropriatenessScorer = createScorer({
   description: 'Evaluates if the inventory decision (restock/delay/reallocate) is appropriate given the data',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating an AI inventory manager\'s decision appropriateness. Analyze the context and decision, then return only structured JSON matching the provided schema.',
   },
 })
@@ -103,7 +103,7 @@ export const explanationQualityScorer = createScorer({
   description: 'Evaluates if the agent explains decisions like a human operations manager',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating explanation quality of an AI inventory manager. Return only structured JSON matching the provided schema.',
   },
 })
@@ -174,7 +174,7 @@ export const costOptimizationScorer = createScorer({
   description: 'Evaluates if the decision minimizes total costs (storage + opportunity costs)',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating cost optimization in inventory decisions. Return only structured JSON matching the provided schema.',
   },
 })
@@ -248,7 +248,7 @@ export const demandForecastAccuracyScorer = createScorer({
   description: 'Evaluates the quality and accuracy of demand predictions',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating demand forecasting quality. Return only structured JSON matching the provided schema.',
   },
 })
@@ -324,7 +324,7 @@ export const constraintComplianceScorer = createScorer({
   description: 'Evaluates if the decision respects budget, storage, and operational constraints',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating constraint compliance in inventory decisions. Return only structured JSON matching the provided schema.',
   },
 })
@@ -404,7 +404,7 @@ export const overallDecisionIntelligenceScorer = createScorer({
   description: 'Holistic evaluation of the AI agent as an autonomous inventory manager',
   type: 'agent',
   judge: {
-    model: 'google/gemini-2.5-flash',
+    model: 'mistral/codestral-latest',
     instructions: 'You are evaluating an AI inventory manager\'s overall performance. Return only structured JSON matching the provided schema.',
   },
 })

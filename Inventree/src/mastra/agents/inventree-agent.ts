@@ -5,33 +5,69 @@ import { inventreeTool } from '../tools/inventree-tool';
 import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
-const InventoryDecisionSchema = z.object({
+export const InventoryDecisionSchema = z.object({
   sku: z.string(),
   productName: z.string(),
   action: z.enum(["RESTOCK_URGENT", "RESTOCK_NORMAL", "HOLD", "DISCOUNT_TO_CLEAR"]),
   recommendedQuantity: z.number(),
-  reasoning: z.string().describe("Human-like explanation of why this action was taken"),
-  whyNot: z.string().describe("Explanation of why alternative actions were rejected"),
-  riskScore: z.number().min(1).max(10),
+  currentStock: z.number().describe("The current on-hand inventory"),
+  budgetAvailable: z.number().describe("The remaining budget for this SKU"),
+  reasoning: z.string(),
+  whyNot: z.string(),
+  riskScore: z.number(),
+  sustainabilityRating: z.enum(["Green", "Neutral", "High-Carbon"]).describe("Indicates the carbon footprint of the recommended action"),
 });
 
 export const inventoryAgent = new Agent({
   name: 'Inventory Manager Agent',
   instructions: `
-    You are an expert Inventory Operations Manager. 
-    Your goal is to optimize stock levels based on demand, budget, and storage constraints.
-    
-    When a user provides inventory data:
-    1. Analyze the 7-day sales trend.
-    2. Check if the current stock lasts at least 5 days.
-    3. Make a decision: RESTOCK, DELAY, or REALLOCATE.
-    4. EXPLAIN YOUR REASONING: Why did you pick this action? 
-    5. WHY NOT: Why did you reject the other two actions? (e.g., "Rejected Restock because budget is over limit").
-    
-    Use the inventreeTool to fetch inventory snapshots and the scorers to evaluate decisions.
-    Return concise, structured JSON where appropriate.
+You are a Senior Inventory Operations Manager optimizing decisions for profitability, customer satisfaction, and sustainability.
+
+═══════════════════════════════════════════════════════════════
+📊 ANALYSIS WORKFLOW
+═══════════════════════════════════════════════════════════════
+
+1️⃣ Fetch data using inventreeTool
+
+2️⃣ Calculate metrics:
+   • Daily Velocity = avg last 7 days unitsSold
+   • Days of Cover = onHand / Daily Velocity  
+   • Stock Gap = (Daily Velocity × horizonDays × seasonalityMultiplier) - onHand
+
+3️⃣ Choose action:
+   ┌─ DoC < 3 days AND seasonal demand? → RESTOCK_URGENT
+   ├─ DoC < 5 days? → RESTOCK_NORMAL
+   ├─ DoC > 21 days? → HOLD (overstocked)
+   ├─ Velocity dropped 30%? → DISCOUNT_TO_CLEAR
+   └─ Else → HOLD
+
+4️⃣ Validate constraints:
+   • Budget: Never exceed budgetCap
+   • MOQ: Round up or set quantity = 0
+   • Lead time: Flag urgency if DoC < leadTimeDays
+
+5️⃣ Set sustainability:
+   • Green = can use slow shipping (DoC > 5)
+   • High-Carbon = only if critical stockout AND high margin
+
+═══════════════════════════════════════════════════════════════
+📤 OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════
+
+{
+  "sku": "SKU-XXX",
+  "productName": "Product Name",
+  "action": "RESTOCK_URGENT",
+  "recommendedQuantity": 25,
+  "reasoning": "Stock: 5 units. Velocity: 11/day. Days of cover: 0.5 days. Gap: 25 units. Viral trend detected (2x multiplier).",
+  "whyNot": "HOLD rejected: critical stockout imminent. DISCOUNT rejected: high demand trend.",
+  "riskScore": 8,
+  "sustainabilityRating": "Neutral"
+}
+
+Reasoning must include: current stock, velocity, DoC, gap, and context (seasonality/budget/lead time).
   `,
-  model: 'google/gemini-2.0-flash',
+  model: 'mistral/mistral-large-2512',
   tools: { inventreeTool },
   scorers: {
     decisionAppropriateness: {

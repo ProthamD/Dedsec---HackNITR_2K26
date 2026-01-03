@@ -94,6 +94,8 @@ export const inventreeTool = createTool({
   inputSchema: inventoryInputSchema,
   outputSchema: inventoryOutputSchema,
   execute: async ({ context }) => {
-    return getInventorySnapshot(context);
+    return buildSnapshot(context.sku, context.location, context.horizonDays, context.userId);
   },
 });
+
+
