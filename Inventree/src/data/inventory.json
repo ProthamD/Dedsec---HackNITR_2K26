@@ -1,406 +1,1562 @@
 [
   {
-    "id": "sku-1000",
-    "name": "Gemini Phone Pro A",
-    "category": "Smartphones",
-    "current_stock": 6,
-    "avg_daily_sales": 12.3,
-    "unit_cost": 700,
-    "selling_price": 1100,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.11",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.69",
-    "tags": [
-      "high-risk",
-      "promo-eligible"
-    ]
+    "sku": "SKU-200",
+    "name": "Smartphone A",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 5,
+    "inboundUnits": 0,
+    "leadTimeDays": 3,
+    "moq": 5,
+    "unitCost": 800,
+    "budgetCap": 15000,
+    "holdingCostPerUnit": "8.00",
+    "stockoutCostPerUnit": "960.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 14
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 13
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 10
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 12
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 12
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 11
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 10
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 10
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 10
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 7
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 6
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 4
+      }
+    ],
+    "seasonalityHint": "Influencer Shoutout",
+    "seasonalityMultiplier": 2
   },
   {
-    "id": "sku-1001",
-    "name": "Sonic Buds B",
-    "category": "Audio",
-    "current_stock": 72,
-    "avg_daily_sales": 8.9,
-    "unit_cost": 40,
-    "selling_price": 99,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.18",
-    "market_signal": "Declining",
-    "supplier_reliability": "0.72",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-201",
+    "name": "Earbuds B",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 51,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 50,
+    "budgetCap": 3000,
+    "holdingCostPerUnit": "0.50",
+    "stockoutCostPerUnit": "60.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 16
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 19
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 19
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 17
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 18
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 23
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1002",
-    "name": "Ultra Charge 65W C",
-    "category": "Power",
-    "current_stock": 71,
-    "avg_daily_sales": 9.7,
-    "unit_cost": 15,
-    "selling_price": 39,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.27",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.82",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-202",
+    "name": "Charger C",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 44,
+    "inboundUnits": 0,
+    "leadTimeDays": 4,
+    "moq": 5,
+    "unitCost": 15,
+    "budgetCap": 2000,
+    "holdingCostPerUnit": "0.15",
+    "stockoutCostPerUnit": "18.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 44
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 40
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 47
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 44
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 38
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 46
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 34
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 38
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 44
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 39
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 36
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 41
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 46
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 39
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1003",
-    "name": "Zen Watch D",
-    "category": "Wearables",
-    "current_stock": 27,
-    "avg_daily_sales": 7,
-    "unit_cost": 150,
-    "selling_price": 299,
-    "lead_time_days": 4,
-    "storage_space_per_unit": "0.35",
-    "market_signal": "Declining",
-    "supplier_reliability": "0.62",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-203",
+    "name": "Smartwatch D",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 48,
+    "inboundUnits": 0,
+    "leadTimeDays": 2,
+    "moq": 5,
+    "unitCost": 200,
+    "budgetCap": 5000,
+    "holdingCostPerUnit": "2.00",
+    "stockoutCostPerUnit": "240.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 6
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 7
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 9
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1004",
-    "name": "Power Bank 20k E",
-    "category": "Power",
-    "current_stock": 34,
-    "avg_daily_sales": 14.7,
-    "unit_cost": 25,
-    "selling_price": 59,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.31",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "1.00",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-204",
+    "name": "Laptop E",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 68,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 1200,
+    "budgetCap": 500,
+    "holdingCostPerUnit": "12.00",
+    "stockoutCostPerUnit": "1440.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 1
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 2
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 1
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1005",
-    "name": "Gemini Phone Pro A",
-    "category": "Smartphones",
-    "current_stock": 31,
-    "avg_daily_sales": 5.4,
-    "unit_cost": 700,
-    "selling_price": 1100,
-    "lead_time_days": 2,
-    "storage_space_per_unit": "0.36",
-    "market_signal": "Declining",
-    "supplier_reliability": "0.79",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-205",
+    "name": "Smartphone F",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 48,
+    "inboundUnits": 0,
+    "leadTimeDays": 3,
+    "moq": 5,
+    "unitCost": 800,
+    "budgetCap": 15000,
+    "holdingCostPerUnit": "8.00",
+    "stockoutCostPerUnit": "960.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 5
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 4
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 5
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1006",
-    "name": "Sonic Buds B",
-    "category": "Audio",
-    "current_stock": 64,
-    "avg_daily_sales": 3,
-    "unit_cost": 40,
-    "selling_price": 99,
-    "lead_time_days": 2,
-    "storage_space_per_unit": "0.46",
-    "market_signal": "Trending High",
-    "supplier_reliability": "0.79",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-206",
+    "name": "Earbuds G",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 37,
+    "inboundUnits": 0,
+    "leadTimeDays": 2,
+    "moq": 5,
+    "unitCost": 50,
+    "budgetCap": 3000,
+    "holdingCostPerUnit": "0.50",
+    "stockoutCostPerUnit": "60.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 16
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 19
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 20
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 21
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 21
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1007",
-    "name": "Ultra Charge 65W C",
-    "category": "Power",
-    "current_stock": 59,
-    "avg_daily_sales": 4.1,
-    "unit_cost": 15,
-    "selling_price": 39,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.54",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.75",
-    "tags": [
-      "high-risk",
-      "promo-eligible"
-    ]
+    "sku": "SKU-207",
+    "name": "Charger H",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 40,
+    "inboundUnits": 0,
+    "leadTimeDays": 15,
+    "moq": 5,
+    "unitCost": 15,
+    "budgetCap": 2000,
+    "holdingCostPerUnit": "0.15",
+    "stockoutCostPerUnit": "18.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 36
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 43
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 34
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 35
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 47
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 35
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 47
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 43
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 40
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 41
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 39
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 43
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 42
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 34
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 39
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 41
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1008",
-    "name": "Zen Watch D",
-    "category": "Wearables",
-    "current_stock": 81,
-    "avg_daily_sales": 4.5,
-    "unit_cost": 150,
-    "selling_price": 299,
-    "lead_time_days": 6,
-    "storage_space_per_unit": "0.43",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "0.69",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-208",
+    "name": "Smartwatch I",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 58,
+    "inboundUnits": 0,
+    "leadTimeDays": 4,
+    "moq": 5,
+    "unitCost": 200,
+    "budgetCap": 5000,
+    "holdingCostPerUnit": "2.00",
+    "stockoutCostPerUnit": "240.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 6
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 8
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 8
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1009",
-    "name": "Power Bank 20k E",
-    "category": "Power",
-    "current_stock": 6,
-    "avg_daily_sales": 16,
-    "unit_cost": 25,
-    "selling_price": 59,
-    "lead_time_days": 4,
-    "storage_space_per_unit": "0.35",
-    "market_signal": "Declining",
-    "supplier_reliability": "0.77",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-209",
+    "name": "Laptop J",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 47,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 1200,
+    "budgetCap": 20000,
+    "holdingCostPerUnit": "12.00",
+    "stockoutCostPerUnit": "1440.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 2
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 2
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 2
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1010",
-    "name": "Gemini Phone Pro A",
-    "category": "Smartphones",
-    "current_stock": 99,
-    "avg_daily_sales": 11,
-    "unit_cost": 700,
-    "selling_price": 1100,
-    "lead_time_days": 2,
-    "storage_space_per_unit": "0.52",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.75",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-210",
+    "name": "Smartphone K",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 43,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 800,
+    "budgetCap": 15000,
+    "holdingCostPerUnit": "8.00",
+    "stockoutCostPerUnit": "960.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 5
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 4
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 4
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 4
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 4
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1011",
-    "name": "Sonic Buds B",
-    "category": "Audio",
-    "current_stock": 70,
-    "avg_daily_sales": 11.9,
-    "unit_cost": 40,
-    "selling_price": 99,
-    "lead_time_days": 4,
-    "storage_space_per_unit": "0.18",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.86",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-211",
+    "name": "Earbuds L",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 26,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 50,
+    "budgetCap": 3000,
+    "holdingCostPerUnit": "0.50",
+    "stockoutCostPerUnit": "60.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 20
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 19
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 19
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 23
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 17
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 18
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 21
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 16
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 22
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 22
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 16
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 20
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1012",
-    "name": "Ultra Charge 65W C",
-    "category": "Power",
-    "current_stock": 27,
-    "avg_daily_sales": 16.5,
-    "unit_cost": 15,
-    "selling_price": 39,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.23",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.87",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-212",
+    "name": "Charger M",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 63,
+    "inboundUnits": 0,
+    "leadTimeDays": 5,
+    "moq": 5,
+    "unitCost": 15,
+    "budgetCap": 2000,
+    "holdingCostPerUnit": "0.15",
+    "stockoutCostPerUnit": "18.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 39
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 32
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 35
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 40
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 46
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 44
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 47
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 39
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 47
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 35
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 46
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 40
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 34
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 45
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 37
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 46
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 44
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 46
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 32
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 44
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 38
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1013",
-    "name": "Zen Watch D",
-    "category": "Wearables",
-    "current_stock": 59,
-    "avg_daily_sales": 4.6,
-    "unit_cost": 150,
-    "selling_price": 299,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.14",
-    "market_signal": "Trending High",
-    "supplier_reliability": "0.77",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-213",
+    "name": "Smartwatch N",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 30,
+    "inboundUnits": 0,
+    "leadTimeDays": 2,
+    "moq": 5,
+    "unitCost": 200,
+    "budgetCap": 5000,
+    "holdingCostPerUnit": "2.00",
+    "stockoutCostPerUnit": "240.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 6
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 9
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 7
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 8
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 6
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 6
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 6
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   },
   {
-    "id": "sku-1014",
-    "name": "Power Bank 20k E",
-    "category": "Power",
-    "current_stock": 22,
-    "avg_daily_sales": 6.6,
-    "unit_cost": 25,
-    "selling_price": 59,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.44",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.65",
-    "tags": [
-      "high-risk",
-      "promo-eligible"
-    ]
-  },
-  {
-    "id": "sku-1015",
-    "name": "Gemini Phone Pro A",
-    "category": "Smartphones",
-    "current_stock": 10,
-    "avg_daily_sales": 5.2,
-    "unit_cost": 700,
-    "selling_price": 1100,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.48",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.97",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1016",
-    "name": "Sonic Buds B",
-    "category": "Audio",
-    "current_stock": 49,
-    "avg_daily_sales": 10.3,
-    "unit_cost": 40,
-    "selling_price": 99,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.52",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "0.81",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1017",
-    "name": "Ultra Charge 65W C",
-    "category": "Power",
-    "current_stock": 14,
-    "avg_daily_sales": 3.7,
-    "unit_cost": 15,
-    "selling_price": 39,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.29",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "0.65",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1018",
-    "name": "Zen Watch D",
-    "category": "Wearables",
-    "current_stock": 42,
-    "avg_daily_sales": 14.2,
-    "unit_cost": 150,
-    "selling_price": 299,
-    "lead_time_days": 4,
-    "storage_space_per_unit": "0.32",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.96",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1019",
-    "name": "Power Bank 20k E",
-    "category": "Power",
-    "current_stock": 8,
-    "avg_daily_sales": 6.7,
-    "unit_cost": 25,
-    "selling_price": 59,
-    "lead_time_days": 6,
-    "storage_space_per_unit": "0.41",
-    "market_signal": "Stable",
-    "supplier_reliability": "0.86",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1020",
-    "name": "Gemini Phone Pro A",
-    "category": "Smartphones",
-    "current_stock": 25,
-    "avg_daily_sales": 8,
-    "unit_cost": 700,
-    "selling_price": 1100,
-    "lead_time_days": 6,
-    "storage_space_per_unit": "0.51",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "0.71",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1021",
-    "name": "Sonic Buds B",
-    "category": "Audio",
-    "current_stock": 94,
-    "avg_daily_sales": 8.9,
-    "unit_cost": 40,
-    "selling_price": 99,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.44",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.68",
-    "tags": [
-      "high-risk",
-      "promo-eligible"
-    ]
-  },
-  {
-    "id": "sku-1022",
-    "name": "Ultra Charge 65W C",
-    "category": "Power",
-    "current_stock": 3,
-    "avg_daily_sales": 15,
-    "unit_cost": 15,
-    "selling_price": 39,
-    "lead_time_days": 3,
-    "storage_space_per_unit": "0.53",
-    "market_signal": "Holiday Peak",
-    "supplier_reliability": "0.88",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1023",
-    "name": "Zen Watch D",
-    "category": "Wearables",
-    "current_stock": 42,
-    "avg_daily_sales": 16.5,
-    "unit_cost": 150,
-    "selling_price": 299,
-    "lead_time_days": 5,
-    "storage_space_per_unit": "0.31",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.90",
-    "tags": [
-      "standard"
-    ]
-  },
-  {
-    "id": "sku-1024",
-    "name": "Power Bank 20k E",
-    "category": "Power",
-    "current_stock": 19,
-    "avg_daily_sales": 5.6,
-    "unit_cost": 25,
-    "selling_price": 59,
-    "lead_time_days": 6,
-    "storage_space_per_unit": "0.28",
-    "market_signal": "Viral (Social Media)",
-    "supplier_reliability": "0.70",
-    "tags": [
-      "standard"
-    ]
+    "sku": "SKU-214",
+    "name": "Laptop O",
+    "location": "Main-Warehouse",
+    "horizonDays": 21,
+    "onHand": 55,
+    "inboundUnits": 0,
+    "leadTimeDays": 4,
+    "moq": 5,
+    "unitCost": 1200,
+    "budgetCap": 20000,
+    "holdingCostPerUnit": "12.00",
+    "stockoutCostPerUnit": "1440.00",
+    "safetyStockDays": 3,
+    "targetServiceLevel": 0.95,
+    "demandHistory": [
+      {
+        "date": "2025-12-13",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-14",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-15",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-16",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-17",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-18",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-19",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-20",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-21",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-22",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-23",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-24",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-25",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-26",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-27",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-28",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-29",
+        "unitsSold": 2
+      },
+      {
+        "date": "2025-12-30",
+        "unitsSold": 1
+      },
+      {
+        "date": "2025-12-31",
+        "unitsSold": 2
+      },
+      {
+        "date": "2026-01-01",
+        "unitsSold": 1
+      },
+      {
+        "date": "2026-01-02",
+        "unitsSold": 2
+      }
+    ],
+    "seasonalityHint": "Stable",
+    "seasonalityMultiplier": 1
   }
 ]
