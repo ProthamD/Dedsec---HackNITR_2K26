@@ -120,13 +120,28 @@
 
     <script>
         function handleIssue(issueType) {
-            console.log('Issue clicked:', issueType);
-            // Placeholder for future functionality
-            alert(`${issueType} button clicked - functionality coming soon!`);
+            console.log('handleIssue called with:', issueType);
+            console.log('Current location:', window.location.href);
+            
+            if (issueType === 'reduceWaste') {
+                console.log('Redirecting to /reduce-waste...');
+                window.location.href = '/reduce-waste';
+                return false;
+            } else if (issueType === 'alert') {
+                console.log('Redirecting to /alert...');
+                window.location.href = '/alert';
+                return false;
+            } else {
+                // Placeholder for future functionality
+                alert(`${issueType} button clicked - functionality coming soon!`);
+            }
         }
+        
         // Initialize Feather Icons
         if (typeof feather !== 'undefined') {
             feather.replace();
         }
+        
+        console.log('Management.ejs script loaded');
     </script>
 </section>

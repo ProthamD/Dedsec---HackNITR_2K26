@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reduce Waste - Inventree</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+        }
+        body { background: var(--bg-primary); color: var(--text-primary); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="px-4 py-6" style="border-bottom: 1px solid var(--border);">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">
+                    <span style="color: var(--text-primary);">Inven</span><span style="color: var(--accent-green);">tree</span>
+                </h1>
+                <p class="text-sm" style="color: var(--text-muted);">Reduce Waste</p>
+            </div>
+            <a href="/" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all" style="background: var(--bg-card); border: 1px solid var(--border);">
+                <i data-feather="arrow-left" class="w-4 h-4"></i>
+                <span>Back</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Product Info Card -->
+        <div class="rounded-xl p-6 mb-8" style="background: var(--bg-card); border: 1px solid var(--border);">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold mb-1" style="color: var(--text-primary);"><%= product.name %></h2>
+                    <p style="color: var(--text-muted);">SKU: <%= product.sku %> | Current Location: <%= product.location %></p>
+                </div>
+                <div class="px-4 py-2 rounded-lg" style="background: hsla(239, 68%, 68%, 0.1); border: 1px solid hsla(239, 68%, 68%, 0.3);">
+                    <p class="text-sm" style="color: var(--text-muted);">Overstocked</p>
+                    <p class="text-2xl font-bold" style="color: var(--text-primary);"><%= product.onHand %> units</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <p style="color: var(--text-muted);">Unit Cost</p>
+                    <p class="font-semibold">$<%= product.unitCost %></p>
+                </div>
+                <div>
+                    <p style="color: var(--text-muted);">Lead Time</p>
+                    <p class="font-semibold"><%= product.leadTimeDays %> days</p>
+                </div>
+                <div>
+                    <p style="color: var(--text-muted);">Daily Demand</p>
+                    <p class="font-semibold"><%= avgDemand.toFixed(1) %> units/day</p>
+                </div>
+                <div>
+                    <p style="color: var(--text-muted);">Excess Stock</p>
+                    <p class="font-semibold" style="color: rgb(239, 68, 68);"><%= excessStock %> units</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warehouse Distribution List -->
+        <div class="rounded-xl overflow-hidden mb-6" style="background: var(--bg-card); border: 1px solid var(--border);">
+            <div class="p-6 flex items-center justify-between" style="border-bottom: 1px solid var(--border);">
+                <div>
+                    <h3 class="text-lg font-bold mb-1">Redistribution Opportunities</h3>
+                    <p class="text-sm" style="color: var(--text-muted);">Warehouses sorted by lowest transfer cost</p>
+                </div>
+                <button 
+                    id="distributeBtn"
+                    onclick="askAIToDistribute()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                    style="background: var(--accent-green); color: hsl(240, 6%, 10%);">
+                    <i data-feather="cpu" class="w-4 h-4"></i>
+                    <span>Ask AI to Distribute</span>
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead style="background: hsla(240, 4%, 16%, 1);">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Warehouse</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Demand (units/day)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Current Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Transfer Cost</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style="color: var(--text-muted);">Suggested Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warehouseTable">
+                        <% warehouses.forEach((wh, index) => { %>
+                        <tr class="border-t" style="border-color: var(--border);" data-warehouse-id="<%= wh.id %>">
+                            <td class="px-6 py-4">
+                                <input type="checkbox" class="warehouse-checkbox" data-warehouse="<%= index %>">
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <i data-feather="package" class="w-4 h-4" style="color: var(--accent-green);"></i>
+                                    <span class="font-medium"><%= wh.name %></span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4" style="color: var(--text-muted);"><%= wh.location %></td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs font-medium" style="background: hsla(142, 70%, 45%, 0.1); color: var(--accent-green);">
+                                    <%= wh.demand %> units/day
+                                </span>
+                            </td>
+                            <td class="px-6 py-4"><%= wh.currentStock %> units</td>
+                            <td class="px-6 py-4">
+                                <span class="font-semibold" style="color: var(--accent-green);">$<%= wh.transferCost.toFixed(2) %></span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <input 
+                                    type="number" 
+                                    id="qty-<%= index %>"
+                                    value="<%= wh.suggestedQty %>"
+                                    min="0"
+                                    max="<%= excessStock %>"
+                                    class="w-20 px-2 py-1 rounded border text-center"
+                                    style="background: var(--bg-primary); border-color: var(--border); color: var(--text-primary);"
+                                >
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action Plans Section -->
+        <div class="rounded-xl p-6" style="background: var(--bg-card); border: 1px solid var(--border);">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-bold mb-1">AI-Generated Action Plans</h3>
+                    <p class="text-sm" style="color: var(--text-muted);">Creative strategies to reduce waste and optimize inventory</p>
+                </div>
+                <button 
+                    id="generatePlanBtn"
+                    onclick="generatePlans()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                    style="background: var(--bg-card); border: 1px solid var(--border);">
+                    <i data-feather="zap" class="w-4 h-4" style="color: var(--accent-green);"></i>
+                    <span>Generate Plans</span>
+                </button>
+            </div>
+
+            <!-- Plans Grid -->
+            <div id="plansContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Plans will be inserted here dynamically -->
+                <div class="text-center py-8" style="color: var(--text-muted);">
+                    <i data-feather="lightbulb" class="w-12 h-12 mx-auto mb-2"></i>
+                    <p>Click "Generate Plans" to get AI-powered recommendations</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.warehouse-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        async function askAIToDistribute() {
+            console.log('🚀 askAIToDistribute called');
+            const btn = document.getElementById('distributeBtn');
+            console.log('Button element:', btn);
+            btn.disabled = true;
+            btn.innerHTML = '<i data-feather="loader" class="w-4 h-4 animate-spin"></i><span>Consulting AI...</span>';
+            feather.replace();
+
+            try {
+                console.log('📡 Sending request to /api/ai-distribute-recommendation');
+                // Ask AI for distribution recommendation
+                const warehouses = <%- JSON.stringify(warehouses) %>;
+                console.log('Warehouses data:', warehouses);
+                
+                const aiResponse = await fetch('/api/ai-distribute-recommendation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productSku: '<%= product.sku %>',
+                        productName: '<%= product.name %>',
+                        excessStock: <%= excessStock %>,
+                        warehouses: warehouses,
+                        userId: 'user123'
+                    })
+                });
+
+                const aiResult = await aiResponse.json();
+                
+                if (aiResult.success && aiResult.recommendation) {
+                    const rec = aiResult.recommendation;
+                    
+                    // Show AI's recommendation
+                    const message = `🤖 AI Recommendation:\n\n${rec.decision}\n\n${rec.reasoning}\n\nDistribution Plan:\n${rec.distributions.map(d => `• ${d.warehouseName}: ${d.quantity} units (${d.reason})`).join('\n')}\n\nTotal: ${rec.totalUnits} units to ${rec.distributions.length} warehouses\nEstimated Cost: $${rec.estimatedCost.toFixed(2)}\n\n✅ Proceed with distribution?`;
+                    
+                    if (confirm(message)) {
+                        // Execute the AI's recommendation
+                        await executeDistribution(rec.distributions);
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i data-feather="cpu" class="w-4 h-4"></i><span>Ask AI to Distribute</span>';
+                        feather.replace();
+                    }
+                } else {
+                    alert('AI could not generate recommendation: ' + (aiResult.error || 'Unknown error'));
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-feather="cpu" class="w-4 h-4"></i><span>Ask AI to Distribute</span>';
+                    feather.replace();
+                }
+            } catch (error) {
+                console.error('AI consultation error:', error);
+                alert('Failed to consult AI. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-feather="cpu" class="w-4 h-4"></i><span>Ask AI to Distribute</span>';
+                feather.replace();
+            }
+        }
+
+        async function executeDistribution(distributions) {
+            const btn = document.getElementById('distributeBtn');
+            btn.innerHTML = '<i data-feather="loader" class="w-4 h-4 animate-spin"></i><span>Executing...</span>';
+            feather.replace();
+
+            try {
+                const response = await fetch('/api/distribute-stock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productSku: '<%= product.sku %>',
+                        distributions: distributions.map(d => ({
+                            warehouseId: d.warehouseId,
+                            quantity: d.quantity
+                        })),
+                        userId: 'user123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✓ Successfully distributed ${result.totalDistributed} units to ${result.warehousesUpdated} warehouses!\n\nNew stock level: ${result.newStockLevel} units`);
+                    window.location.reload();
+                } else {
+                    alert('Distribution failed: ' + result.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-feather="cpu" class="w-4 h-4"></i><span>Ask AI to Distribute</span>';
+                    feather.replace();
+                }
+            } catch (error) {
+                console.error('Distribution error:', error);
+                alert('Failed to execute distribution. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-feather="cpu" class="w-4 h-4"></i><span>Ask AI to Distribute</span>';
+                feather.replace();
+            }
+        }
+
+        async function generatePlans() {
+            console.log('🚀 generatePlans called');
+            const btn = document.getElementById('generatePlanBtn');
+            const container = document.getElementById('plansContainer');
+            console.log('Button element:', btn);
+            console.log('Container element:', container);
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i data-feather="loader" class="w-4 h-4 animate-spin"></i><span>Generating...</span>';
+            feather.replace();
+
+            container.innerHTML = '<div class="text-center py-8 col-span-2" style="color: var(--text-muted);"><i data-feather="loader" class="w-8 h-8 mx-auto mb-2 animate-spin"></i><p>AI is generating creative plans...</p></div>';
+            feather.replace();
+
+            try {
+                console.log('📡 Sending request to /api/generate-waste-plans');
+                const response = await fetch('/api/generate-waste-plans', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productSku: '<%= product.sku %>',
+                        productName: '<%= product.name %>',
+                        excessStock: <%= excessStock %>,
+                        unitCost: <%= product.unitCost %>,
+                        userId: 'user123'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.plans) {
+                    displayPlans(result.plans);
+                } else {
+                    container.innerHTML = '<div class="text-center py-8 col-span-2" style="color: rgb(239, 68, 68);">Failed to generate plans. Please try again.</div>';
+                }
+            } catch (error) {
+                console.error('Plan generation error:', error);
+                container.innerHTML = '<div class="text-center py-8 col-span-2" style="color: rgb(239, 68, 68);">Error generating plans. Please try again.</div>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-feather="zap" class="w-4 h-4" style="color: var(--accent-green);"></i><span>Generate Plans</span>';
+                feather.replace();
+            }
+        }
+
+        function displayPlans(plans) {
+            const container = document.getElementById('plansContainer');
+            container.innerHTML = plans.map((plan, index) => `
+                <div class="p-4 rounded-lg transition-all" style="background: hsla(240, 4%, 16%, 1); border: 1px solid var(--border);">
+                    <div class="flex items-start gap-3 mb-3">
+                        <div class="p-2 rounded-lg" style="background: hsla(142, 70%, 45%, 0.1);">
+                            ${getPlanIcon(plan.type)}
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold mb-1">${plan.title}</h4>
+                            <p class="text-sm mb-2" style="color: var(--text-muted);">${plan.description}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm mb-3">
+                        <span style="color: var(--text-muted);">Expected Impact:</span>
+                        <span class="font-semibold" style="color: var(--accent-green);">${plan.impact}</span>
+                    </div>
+                    <button 
+                        onclick="executePlan('${plan.type}', '${plan.title}', ${plan.estimatedUnitsReduced || 0})"
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
+                        style="background: var(--accent-green); color: hsl(240, 6%, 10%);">
+                        <i data-feather="play-circle" class="w-4 h-4"></i>
+                        <span>Execute Plan</span>
+                    </button>
+                </div>
+            `).join('');
+            feather.replace();
+        }
+
+        function executePlan(type, title, unitsReduced) {
+            // Create stylish notification overlay
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, hsla(240, 6%, 10%, 0.98) 0%, hsla(142, 70%, 15%, 0.98) 100%);
+                border: 2px solid var(--accent-green);
+                border-radius: 16px;
+                padding: 32px;
+                z-index: 10000;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+                min-width: 400px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <style>
+                    @keyframes slideIn {
+                        from { transform: translate(-50%, -60%); opacity: 0; }
+                        to { transform: translate(-50%, -50%); opacity: 1; }
+                    }
+                    @keyframes checkmark {
+                        0% { transform: scale(0) rotate(45deg); }
+                        50% { transform: scale(1.2) rotate(45deg); }
+                        100% { transform: scale(1) rotate(45deg); }
+                    }
+                </style>
+                <div style="text-align: center;">
+                    <div style="width: 64px; height: 64px; margin: 0 auto 20px; background: hsla(142, 70%, 45%, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 40px; height: 40px; color: var(--accent-green); animation: checkmark 0.5s ease-out 0.1s both;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 style="color: var(--accent-green); font-size: 24px; font-weight: bold; margin-bottom: 12px;">
+                        ✓ Plan Executed Successfully!
+                    </h3>
+                    <p style="color: var(--text-primary); font-size: 18px; margin-bottom: 8px;">
+                        ${title}
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">
+                        Estimated reduction: ${unitsReduced} units
+                    </p>
+                    <div style="padding: 12px; background: hsla(142, 70%, 45%, 0.1); border-radius: 8px; margin-bottom: 20px;">
+                        <p style="color: var(--text-muted); font-size: 12px; margin: 0;">
+                            <i data-feather="info" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+                            Implementation initiated. Track progress in your dashboard.
+                        </p>
+                    </div>
+                    <button 
+                        onclick="this.parentElement.parentElement.remove(); document.getElementById('overlay').remove();"
+                        style="background: var(--accent-green); color: hsl(240, 6%, 10%); padding: 10px 24px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: transform 0.2s;"
+                        onmouseover="this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.transform='scale(1)'"
+                    >
+                        Got it!
+                    </button>
+                </div>
+            `;
+            
+            // Create overlay backdrop
+            const overlay = document.createElement('div');
+            overlay.id = 'overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 9999;
+                backdrop-filter: blur(4px);
+            `;
+            overlay.onclick = () => {
+                notification.remove();
+                overlay.remove();
+            };
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(notification);
+            
+            // Replace feather icons in the notification
+            if (typeof feather !== 'undefined') {
+                feather.replace();
+            }
+            
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                    overlay.remove();
+                }
+            }, 5000);
+        }
+
+        function getPlanIcon(type) {
+            const icons = {
+                bundle: '<i data-feather="package" class="w-5 h-5" style="color: var(--accent-green);"></i>',
+                discount: '<i data-feather="tag" class="w-5 h-5" style="color: var(--accent-green);"></i>',
+                promotion: '<i data-feather="gift" class="w-5 h-5" style="color: var(--accent-green);"></i>',
+                donation: '<i data-feather="heart" class="w-5 h-5" style="color: var(--accent-green);"></i>',
+                liquidation: '<i data-feather="trending-down" class="w-5 h-5" style="color: var(--accent-green);"></i>'
+            };
+            return icons[type] || icons.bundle;
+        }
+    </script>
+</body>
+</html>

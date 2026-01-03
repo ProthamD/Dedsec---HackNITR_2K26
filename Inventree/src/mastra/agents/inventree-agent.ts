@@ -3,6 +3,8 @@ import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { inventreeTool } from '../tools/inventree-tool';
 import { listInventoryTool } from '../tools/list-inventory-tool';
+import { wasteDistributionTool } from '../tools/waste-distribution-tool';
+import { wastePlanGeneratorTool } from '../tools/waste-plan-generator-tool';
 import { scorers } from '../scorers/inventory-scorer';
 import { z } from "zod";
 
@@ -79,9 +81,30 @@ Reasoning must include: current stock, velocity, DoC, gap, and context (seasonal
 User: "What should I restock?" → Use listInventoryTool to get all items, prioritize by risk
 User: "Analyze my inventory" → Use listInventoryTool, show summary + top priorities
 User: "Should I restock SKU-500?" → Use inventreeTool with SKU-500
+
+═══════════════════════════════════════════════════════════════
+♻️ WASTE REDUCTION & DISTRIBUTION
+═══════════════════════════════════════════════════════════════
+
+When handling overstocked products (onHand > 60 or DoC > 30):
+1️⃣ Use wasteDistributionTool to analyze redistribution opportunities
+2️⃣ Use wastePlanGeneratorTool to generate creative waste reduction strategies
+3️⃣ Provide prioritized recommendations combining distribution + marketing strategies
+
+Distribution priorities:
+- High priority: Warehouses with high demand + low stock + low transfer cost
+- Medium priority: Moderate demand with acceptable transfer costs
+- Low priority: Already well-stocked or high transfer costs
+
+Plan types to consider:
+- Bundle: Pair with complementary products
+- Discount: Flash sales for quick clearance
+- Promotion: Loyalty program rewards
+- Donation: CSR initiatives with tax benefits
+- Liquidation: Bulk sales to recover capital
   `,
   model: 'mistral/mistral-large-2512',
-  tools: { inventreeTool, listInventoryTool },
+  tools: { inventreeTool, listInventoryTool, wasteDistributionTool, wastePlanGeneratorTool },
   scorers: {
     decisionAppropriateness: {
       scorer: scorers.decisionAppropriatenessScorer,
