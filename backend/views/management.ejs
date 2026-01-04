@@ -162,6 +162,10 @@
                 console.log('Redirecting to /inventory/list...');
                 window.location.href = '/inventory/list';
                 return false;
+            } else if (issueType === 'action') {
+                console.log('Redirecting to /action...');
+                window.location.href = '/action';
+                return false;
             } else {
                 // Placeholder for future functionality
                 alert(`${issueType} button clicked - functionality coming soon!`);
