@@ -5,6 +5,7 @@ require("dotenv").config();
 const cors = require("cors");
 const Inventory = require("./models/Inventory");
 const AgentMemory = require("./models/AgentMemory");
+const Action = require("./models/Action");
 const https = require('https');
 
 // ShipEngine API helper function
@@ -388,6 +389,255 @@ app.get("/management", async (req, res) => {
             inventoryCount: 0,
             userId 
         });
+    }
+});
+
+// Action approval page - AI suggested actions
+app.get("/action", async (req, res) => {
+    const userId = "user123";
+    
+    try {
+        // Get all pending actions
+        const pendingActions = await Action.find({ 
+            userId, 
+            status: 'PENDING' 
+        }).sort({ priority: -1, createdAt: -1 }).lean();
+        
+        // Get action statistics
+        const stats = {
+            pending: await Action.countDocuments({ userId, status: 'PENDING' }),
+            approved: await Action.countDocuments({ userId, status: 'APPROVED' }),
+            executed: await Action.countDocuments({ userId, status: 'EXECUTED' }),
+            totalSavings: 0
+        };
+        
+        // Calculate total estimated savings from executed actions
+        const executedActions = await Action.find({ userId, status: 'EXECUTED' }).lean();
+        stats.totalSavings = executedActions.reduce((sum, action) => sum + (action.estimatedSavings || 0), 0);
+        
+        res.render("action", { 
+            actions: pendingActions,
+            stats,
+            userId 
+        });
+    } catch (error) {
+        console.error("Error loading actions:", error);
+        res.render("action", { 
+            actions: [],
+            stats: { pending: 0, approved: 0, executed: 0, totalSavings: 0 },
+            userId 
+        });
+    }
+});
+
+// Generate AI action suggestions
+app.post("/api/actions/generate", async (req, res) => {
+    const userId = "user123";
+    
+    try {
+        // Get all inventory items
+        const inventory = await Inventory.find({ userId }).lean();
+        
+        const suggestions = [];
+        
+        for (const product of inventory) {
+            const demands = product.demandHistory?.map(d => d.unitsSold) || [];
+            const avgDemand = demands.length > 0 
+                ? demands.reduce((a, b) => a + b, 0) / demands.length 
+                : 0;
+            
+            const daysOfCover = avgDemand > 0 ? product.onHand / avgDemand : 999;
+            
+            // Critical: Less than 5 days of stock
+            if (daysOfCover < 5 && product.onHand < product.safetyStockDays * avgDemand) {
+                suggestions.push({
+                    userId,
+                    type: 'EMERGENCY_ORDER',
+                    priority: 'CRITICAL',
+                    productSku: product.sku,
+                    productName: product.name,
+                    currentStock: product.onHand,
+                    suggestedQuantity: Math.max(product.moq, Math.ceil(avgDemand * 21)),
+                    toWarehouse: product.location,
+                    reasoning: `CRITICAL: Only ${daysOfCover.toFixed(1)} days of stock remaining. Daily demand: ${avgDemand.toFixed(1)} units. Immediate order required to prevent stockout.`,
+                    metrics: {
+                        stockoutRisk: 95,
+                        daysOfCover: daysOfCover,
+                        demandTrend: 'stable',
+                        costImpact: product.unitCost * Math.ceil(avgDemand * 21),
+                        urgencyScore: 95
+                    },
+                    aiConfidence: 95,
+                    estimatedCost: product.unitCost * Math.ceil(avgDemand * 21),
+                    estimatedSavings: product.stockoutCostPerUnit * avgDemand * 5
+                });
+            }
+            // High: Approaching low stock
+            else if (daysOfCover < 10) {
+                suggestions.push({
+                    userId,
+                    type: 'RESTOCK',
+                    priority: 'HIGH',
+                    productSku: product.sku,
+                    productName: product.name,
+                    currentStock: product.onHand,
+                    suggestedQuantity: Math.ceil(avgDemand * product.horizonDays),
+                    toWarehouse: product.location,
+                    reasoning: `Stock running low with ${daysOfCover.toFixed(1)} days remaining. Recommend ordering ${Math.ceil(avgDemand * product.horizonDays)} units to cover next ${product.horizonDays} days based on average daily demand of ${avgDemand.toFixed(1)} units.`,
+                    metrics: {
+                        stockoutRisk: 65,
+                        daysOfCover: daysOfCover,
+                        demandTrend: 'stable',
+                        costImpact: product.unitCost * Math.ceil(avgDemand * product.horizonDays),
+                        urgencyScore: 70
+                    },
+                    aiConfidence: 85,
+                    estimatedCost: product.unitCost * Math.ceil(avgDemand * product.horizonDays),
+                    estimatedSavings: product.stockoutCostPerUnit * avgDemand * 2
+                });
+            }
+            // Overstock: Reduce holding costs
+            else if (product.onHand > 60 && daysOfCover > 45) {
+                const excessStock = Math.floor(product.onHand - (avgDemand * 30));
+                suggestions.push({
+                    userId,
+                    type: 'REDUCE_STOCK',
+                    priority: 'MEDIUM',
+                    productSku: product.sku,
+                    productName: product.name,
+                    currentStock: product.onHand,
+                    suggestedQuantity: excessStock,
+                    fromWarehouse: product.location,
+                    reasoning: `Overstocked with ${daysOfCover.toFixed(0)} days of inventory. Suggest reducing by ${excessStock} units through promotions or redistribution to reduce holding costs of $${(product.holdingCostPerUnit * excessStock * 30).toFixed(2)}/month.`,
+                    metrics: {
+                        stockoutRisk: 5,
+                        daysOfCover: daysOfCover,
+                        demandTrend: 'stable',
+                        costImpact: -1 * product.holdingCostPerUnit * excessStock * 30,
+                        urgencyScore: 40
+                    },
+                    aiConfidence: 80,
+                    estimatedCost: 0,
+                    estimatedSavings: product.holdingCostPerUnit * excessStock * 30
+                });
+            }
+            // Network optimization: Offer trucks for transfer
+            else if (product.onHand > 40 && daysOfCover > 30) {
+                suggestions.push({
+                    userId,
+                    type: 'OFFER_TRUCK',
+                    priority: 'LOW',
+                    productSku: product.sku,
+                    productName: product.name,
+                    currentStock: product.onHand,
+                    suggestedQuantity: Math.floor(product.onHand * 0.2),
+                    fromWarehouse: product.location,
+                    reasoning: `Surplus inventory available. Can offer ${Math.floor(product.onHand * 0.2)} units for transfer to other warehouses in network. Current stock provides ${daysOfCover.toFixed(0)} days of cover, allowing safe redistribution.`,
+                    metrics: {
+                        stockoutRisk: 10,
+                        daysOfCover: daysOfCover,
+                        demandTrend: 'stable',
+                        costImpact: 0,
+                        urgencyScore: 20
+                    },
+                    aiConfidence: 70,
+                    estimatedCost: 0,
+                    estimatedSavings: product.holdingCostPerUnit * Math.floor(product.onHand * 0.2) * 15
+                });
+            }
+        }
+        
+        // Save suggestions to database
+        if (suggestions.length > 0) {
+            await Action.insertMany(suggestions);
+        }
+        
+        res.json({ 
+            success: true, 
+            count: suggestions.length,
+            message: `Generated ${suggestions.length} AI-powered action suggestions`
+        });
+    } catch (error) {
+        console.error("Error generating actions:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Approve action
+app.post("/api/actions/approve/:id", async (req, res) => {
+    try {
+        const action = await Action.findById(req.params.id);
+        
+        if (!action) {
+            return res.json({ success: false, message: "Action not found" });
+        }
+        
+        action.status = 'APPROVED';
+        action.approvedAt = new Date();
+        action.approvedBy = "user123";
+        action.notes = req.body.notes || '';
+        
+        await action.save();
+        
+        res.json({ 
+            success: true, 
+            message: `Action approved: ${action.type} for ${action.productName}`
+        });
+    } catch (error) {
+        console.error("Error approving action:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Reject action
+app.post("/api/actions/reject/:id", async (req, res) => {
+    try {
+        const action = await Action.findById(req.params.id);
+        
+        if (!action) {
+            return res.json({ success: false, message: "Action not found" });
+        }
+        
+        action.status = 'REJECTED';
+        action.notes = req.body.notes || 'Rejected by user';
+        
+        await action.save();
+        
+        res.json({ 
+            success: true, 
+            message: `Action rejected: ${action.type} for ${action.productName}`
+        });
+    } catch (error) {
+        console.error("Error rejecting action:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Execute approved action
+app.post("/api/actions/execute/:id", async (req, res) => {
+    try {
+        const action = await Action.findById(req.params.id);
+        
+        if (!action) {
+            return res.json({ success: false, message: "Action not found" });
+        }
+        
+        if (action.status !== 'APPROVED') {
+            return res.json({ success: false, message: "Action must be approved first" });
+        }
+        
+        action.status = 'EXECUTED';
+        action.executedAt = new Date();
+        
+        await action.save();
+        
+        res.json({ 
+            success: true, 
+            message: `Action executed: ${action.type} for ${action.productName}`
+        });
+    } catch (error) {
+        console.error("Error executing action:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

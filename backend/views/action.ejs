@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Action Approvals - Inventree</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+            --accent-red: hsl(0, 70%, 50%);
+            --accent-yellow: hsl(45, 100%, 50%);
+            --accent-blue: hsl(210, 100%, 60%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 2em;
+            color: var(--text-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), #4caf50);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-icon {
+            margin-top: 12px;
+            color: var(--accent-green);
+        }
+
+        .actions-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .actions-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actions-header h2 {
+            font-size: 1.3em;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-color: var(--accent-green);
+        }
+
+        .actions-list {
+            padding: 16px;
+        }
+
+        .action-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .action-item:hover {
+            border-color: var(--accent-green);
+            transform: translateX(4px);
+        }
+
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .action-info {
+            flex: 1;
+        }
+
+        .action-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .type-RESTOCK { background: hsla(210, 100%, 60%, 0.2); color: var(--accent-blue); }
+        .type-TRANSFER { background: hsla(280, 70%, 60%, 0.2); color: hsl(280, 70%, 70%); }
+        .type-ORDER { background: hsla(142, 70%, 45%, 0.2); color: var(--accent-green); }
+        .type-REDUCE_STOCK { background: hsla(45, 100%, 50%, 0.2); color: var(--accent-yellow); }
+        .type-EMERGENCY_ORDER { background: hsla(0, 70%, 50%, 0.2); color: var(--accent-red); }
+        .type-OFFER_TRUCK { background: hsla(180, 70%, 50%, 0.2); color: hsl(180, 70%, 60%); }
+        .type-NETWORK_REQUEST { background: hsla(260, 70%, 60%, 0.2); color: hsl(260, 70%, 70%); }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .priority-CRITICAL {
+            background: hsla(0, 70%, 50%, 0.2);
+            color: var(--accent-red);
+            animation: pulse 2s infinite;
+        }
+
+        .priority-HIGH { background: hsla(30, 100%, 50%, 0.2); color: hsl(30, 100%, 60%); }
+        .priority-MEDIUM { background: hsla(45, 100%, 50%, 0.2); color: var(--accent-yellow); }
+        .priority-LOW { background: hsla(210, 100%, 60%, 0.2); color: var(--accent-blue); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .action-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .action-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        .action-reasoning {
+            background: var(--bg-card);
+            border-left: 3px solid var(--accent-green);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .action-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .metric {
+            background: var(--bg-card);
+            padding: 10px 12px;
+            border-radius: 6px;
+        }
+
+        .metric-label {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .action-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .confidence-bar {
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .confidence-label {
+            font-size: 0.8em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .confidence-progress {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #4caf50);
+            transition: width 0.3s;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-approve {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        .btn-approve:hover {
+            background: #4caf50;
+            transform: scale(1.05);
+        }
+
+        .btn-reject {
+            background: transparent;
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .btn-reject:hover {
+            background: hsla(0, 70%, 50%, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                flex-direction: column;
+            }
+
+            .action-header {
+                flex-direction: column;
+            }
+
+            .action-metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <i data-feather="zap" style="width: 36px; height: 36px; color: var(--accent-green);"></i>
+                <h1>AI Action Approvals</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="generateActions()">
+                    <i data-feather="cpu" style="width: 18px; height: 18px;"></i>
+                    Generate AI Suggestions
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    <i data-feather="home" style="width: 18px; height: 18px;"></i>
+                    Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Pending Actions</div>
+                <div class="stat-value"><%= stats.pending %></div>
+                <i data-feather="clock" class="stat-icon" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Approved</div>
+                <div class="stat-value"><%= stats.approved %></div>
+                <i data-feather="check-circle" class="stat-icon" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Executed</div>
+                <div class="stat-value"><%= stats.executed %></div>
+                <i data-feather="activity" class="stat-icon" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Estimated Savings</div>
+                <div class="stat-value">$<%= stats.totalSavings.toFixed(0) %></div>
+                <i data-feather="trending-up" class="stat-icon" style="width: 20px; height: 20px;"></i>
+            </div>
+        </div>
+
+        <!-- Actions List -->
+        <div class="actions-container">
+            <div class="actions-header">
+                <h2>Pending Actions</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-priority="ALL">All</button>
+                    <button class="filter-tab" data-priority="CRITICAL">Critical</button>
+                    <button class="filter-tab" data-priority="HIGH">High</button>
+                </div>
+            </div>
+
+            <div class="actions-list">
+                <% if (actions.length === 0) { %>
+                    <div class="empty-state">
+                        <i data-feather="inbox" class="empty-icon"></i>
+                        <h3>No Pending Actions</h3>
+                        <p>Click "Generate AI Suggestions" to analyze inventory and get intelligent recommendations</p>
+                    </div>
+                <% } else { %>
+                    <% actions.forEach(action => { %>
+                        <div class="action-item" data-priority="<%= action.priority %>">
+                            <div class="action-header">
+                                <div class="action-info">
+                                    <span class="action-type type-<%= action.type %>"><%= action.type.replace(/_/g, ' ') %></span>
+                                    <span class="priority-badge priority-<%= action.priority %>"><%= action.priority %></span>
+                                    <div class="action-title"><%= action.productName %> (<%= action.productSku %>)</div>
+                                    <div class="action-subtitle">
+                                        Current Stock: <%= action.currentStock %> units | 
+                                        Suggested: <%= action.suggestedQuantity %> units
+                                        <% if (action.toWarehouse) { %>
+                                            | To: <%= action.toWarehouse %>
+                                        <% } %>
+                                        <% if (action.fromWarehouse) { %>
+                                            | From: <%= action.fromWarehouse %>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="action-reasoning">
+                                <strong>AI Reasoning:</strong> <%= action.reasoning %>
+                            </div>
+
+                            <div class="action-metrics">
+                                <div class="metric">
+                                    <div class="metric-label">Days of Cover</div>
+                                    <div class="metric-value"><%= action.metrics?.daysOfCover?.toFixed(1) || 'N/A' %></div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Stockout Risk</div>
+                                    <div class="metric-value"><%= action.metrics?.stockoutRisk || 0 %>%</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Est. Cost</div>
+                                    <div class="metric-value">$<%= action.estimatedCost?.toFixed(0) || 0 %></div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-label">Est. Savings</div>
+                                    <div class="metric-value" style="color: var(--accent-green);">$<%= action.estimatedSavings?.toFixed(0) || 0 %></div>
+                                </div>
+                            </div>
+
+                            <div class="action-footer">
+                                <div class="confidence-bar">
+                                    <div class="confidence-label">AI Confidence</div>
+                                    <div class="confidence-progress">
+                                        <div class="confidence-fill" style="width: <%= action.aiConfidence %>%"></div>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="btn-icon btn-approve" onclick="approveAction('<%= action._id %>')">
+                                        <i data-feather="check" style="width: 16px; height: 16px;"></i>
+                                        Approve
+                                    </button>
+                                    <button class="btn-icon btn-reject" onclick="rejectAction('<%= action._id %>')">
+                                        <i data-feather="x" style="width: 16px; height: 16px;"></i>
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        feather.replace();
+
+        // Filter by priority
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const priority = tab.dataset.priority;
+                document.querySelectorAll('.action-item').forEach(item => {
+                    if (priority === 'ALL' || item.dataset.priority === priority) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        async function generateActions() {
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-feather="loader" style="width: 18px; height: 18px; animation: spin 1s linear infinite;"></i> Analyzing...';
+            
+            try {
+                const response = await fetch('/api/actions/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${data.message}`);
+                    location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Error generating suggestions: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                feather.replace();
+            }
+        }
+
+        async function approveAction(actionId) {
+            if (!confirm('Approve this action? It will be queued for execution.')) return;
+            
+            try {
+                const response = await fetch(`/api/actions/approve/${actionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function rejectAction(actionId) {
+            const reason = prompt('Reason for rejection (optional):');
+            if (reason === null) return; // User cancelled
+            
+            try {
+                const response = await fetch(`/api/actions/reject/${actionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ notes: reason })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + data.message);
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+    </script>
+
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</body>
+</html>
