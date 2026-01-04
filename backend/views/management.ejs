@@ -115,16 +115,28 @@
                     </button>
                 <% } %>
 
-                                    <button 
-                        onclick="handleIssue('courses')"
-                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
-                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(239, 68, 68, 0.5);">
-                        <i data-feather="zap" class="w-5 h-5" style="color: rgb(31, 217, 59);"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-semibold">Courses</div>
-                            <div class="text-xs" style="color: var(--text-muted);">Critical items</div>
-                        </div>
-                    </button>
+                <!-- Manage Inventory Button (Always visible) -->
+                <button 
+                    onclick="handleIssue('manageInventory')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                    style="background: linear-gradient(135deg, var(--accent-green), #4caf50); color: hsl(0, 0%, 0%); border: none;">
+                    <i data-feather="database" class="w-5 h-5"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Manage Inventory</div>
+                        <div class="text-xs" style="opacity: 0.8;">View, Edit & Delete Products</div>
+                    </div>
+                </button>
+
+                <button 
+                    onclick="handleIssue('courses')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
+                    style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(142, 70, 245, 0.5);">
+                    <i data-feather="book-open" class="w-5 h-5" style="color: rgb(142, 70, 245);"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Courses</div>
+                        <div class="text-xs" style="color: var(--text-muted);">Learn inventory management</div>
+                    </div>
+                </button>
             </div>
         </div>
     </div>
@@ -145,6 +157,10 @@
             } else if (issueType === 'courses') {
                 console.log('Redirecting to /courses...');
                 window.location.href = '/courses';
+                return false;
+            } else if (issueType === 'manageInventory') {
+                console.log('Redirecting to /inventory/list...');
+                window.location.href = '/inventory/list';
                 return false;
             } else {
                 // Placeholder for future functionality

@@ -4,188 +4,373 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Inventory - Inventree</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 py-8 px-4">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-8 text-white">
-            <h1 class="text-5xl font-extrabold mb-3 drop-shadow-2xl">📦 Add Inventory</h1>
-            <p class="text-lg opacity-90">Add new products to your inventory system</p>
-        </div>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+        }
 
-        <!-- Form Container -->
-        <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
-            <form action="/inventory/add" method="POST" class="space-y-6">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header h1 span.green {
+            color: var(--accent-green);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1em;
+        }
+
+        .form-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .section {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            font-size: 2em;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: rgb(239, 68, 68);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .form-hint {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), #4caf50);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 16px;
+            }
+
+            .form-container {
+                padding: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📦 Add <span class="green">Inventory</span></h1>
+            <p>Add new products to your inventory system</p>
+        </header>
+
+        <div class="form-container">
+            <form action="/inventory/add" method="POST">
                 <!-- Basic Information -->
-                <div class="border-b border-gray-200 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">📋</span> Basic Information
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">SKU *</label>
-                            <input type="text" name="sku" required 
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., SKU-001">
+                <div class="section">
+
+                    <div class="section-header">
+                        <span class="section-icon">📋</span>
+                        <h2 class="section-title">Basic Information</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">SKU <span class="required">*</span></label>
+                            <input type="text" name="sku" required class="form-input" placeholder="e.g., SKU-001">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Product Name *</label>
-                            <input type="text" name="name" required 
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., Wireless Earbuds">
+                        <div class="form-group">
+                            <label class="form-label">Product Name <span class="required">*</span></label>
+                            <input type="text" name="name" required class="form-input" placeholder="e.g., Wireless Earbuds">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                            <input type="text" name="location" value="Main-Warehouse"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., Main-Warehouse">
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="location" value="Main-Warehouse" class="form-input" placeholder="e.g., Main-Warehouse">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Horizon Days</label>
-                            <input type="number" name="horizonDays" value="21"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="21">
+                        <div class="form-group">
+                            <label class="form-label">Horizon Days</label>
+                            <input type="number" name="horizonDays" value="21" class="form-input" placeholder="21">
                         </div>
                     </div>
                 </div>
 
                 <!-- Stock Information -->
-                <div class="border-b border-gray-200 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">📊</span> Stock Information
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">On Hand *</label>
-                            <input type="number" name="onHand" required value="0"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="0">
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-icon">📊</span>
+                        <h2 class="section-title">Stock Information</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">On Hand <span class="required">*</span></label>
+                            <input type="number" name="onHand" required value="0" class="form-input" placeholder="0">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Inbound Units</label>
-                            <input type="number" name="inboundUnits" value="0"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="0">
+                        <div class="form-group">
+                            <label class="form-label">Inbound Units</label>
+                            <input type="number" name="inboundUnits" value="0" class="form-input" placeholder="0">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Safety Stock Days</label>
-                            <input type="number" name="safetyStockDays" value="3"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="3">
+                        <div class="form-group">
+                            <label class="form-label">Safety Stock Days</label>
+                            <input type="number" name="safetyStockDays" value="3" class="form-input" placeholder="3">
                         </div>
                     </div>
                 </div>
 
                 <!-- Supplier & Ordering -->
-                <div class="border-b border-gray-200 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">🚚</span> Supplier & Ordering
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Lead Time (Days) *</label>
-                            <input type="number" name="leadTimeDays" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 7">
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-icon">🚚</span>
+                        <h2 class="section-title">Supplier & Ordering</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Lead Time (Days) <span class="required">*</span></label>
+                            <input type="number" name="leadTimeDays" required class="form-input" placeholder="e.g., 7">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">MOQ (Minimum Order Quantity) *</label>
-                            <input type="number" name="moq" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 50">
+                        <div class="form-group">
+                            <label class="form-label">MOQ (Minimum Order Quantity) <span class="required">*</span></label>
+                            <input type="number" name="moq" required class="form-input" placeholder="e.g., 50">
                         </div>
                     </div>
                 </div>
 
                 <!-- Cost Information -->
-                <div class="border-b border-gray-200 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">💰</span> Cost Information
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Unit Cost ($) *</label>
-                            <input type="number" step="0.01" name="unitCost" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 25.50">
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-icon">💰</span>
+                        <h2 class="section-title">Cost Information</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Unit Cost ($) <span class="required">*</span></label>
+                            <input type="number" step="0.01" name="unitCost" required class="form-input" placeholder="e.g., 25.50">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Budget Cap ($) *</label>
-                            <input type="number" step="0.01" name="budgetCap" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 5000">
+                        <div class="form-group">
+                            <label class="form-label">Budget Cap ($) <span class="required">*</span></label>
+                            <input type="number" step="0.01" name="budgetCap" required class="form-input" placeholder="e.g., 5000">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Holding Cost Per Unit ($) *</label>
-                            <input type="text" name="holdingCostPerUnit" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 0.50">
+                        <div class="form-group">
+                            <label class="form-label">Holding Cost Per Unit ($) <span class="required">*</span></label>
+                            <input type="text" name="holdingCostPerUnit" required class="form-input" placeholder="e.g., 0.50">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Stockout Cost Per Unit ($) *</label>
-                            <input type="text" name="stockoutCostPerUnit" required
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="e.g., 10.00">
+                        <div class="form-group">
+                            <label class="form-label">Stockout Cost Per Unit ($) <span class="required">*</span></label>
+                            <input type="text" name="stockoutCostPerUnit" required class="form-input" placeholder="e.g., 10.00">
                         </div>
                     </div>
                 </div>
 
                 <!-- Forecasting -->
-                <div class="border-b border-gray-200 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">📈</span> Forecasting
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Seasonality Hint</label>
-                            <select name="seasonalityHint"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all">
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-icon">📈</span>
+                        <h2 class="section-title">Forecasting</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Seasonality Hint</label>
+                            <select name="seasonalityHint" class="form-select">
                                 <option value="Stable">Stable</option>
                                 <option value="Seasonal">Seasonal</option>
                                 <option value="Trending Up">Trending Up</option>
                                 <option value="Trending Down">Trending Down</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Seasonality Multiplier</label>
-                            <input type="number" step="0.1" name="seasonalityMultiplier" value="1"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="1.0">
+                        <div class="form-group">
+                            <label class="form-label">Seasonality Multiplier</label>
+                            <input type="number" step="0.1" name="seasonalityMultiplier" value="1" class="form-input" placeholder="1.0">
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Target Service Level</label>
-                            <input type="number" step="0.01" name="targetServiceLevel" value="0.95"
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                                placeholder="0.95">
+                        <div class="form-group">
+                            <label class="form-label">Target Service Level</label>
+                            <input type="number" step="0.01" name="targetServiceLevel" value="0.95" class="form-input" placeholder="0.95">
                         </div>
                     </div>
                 </div>
 
-                <!-- Demand History (Optional) -->
-                <div class="pb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span class="text-3xl">📉</span> Demand History (Optional)
-                    </h2>
-                    <p class="text-sm text-gray-600 mb-4">Add historical demand data as comma-separated values (e.g., 10,15,12,20)</p>
-                    <textarea name="demandHistory" rows="3"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-300 focus:border-purple-500 transition-all"
-                        placeholder="e.g., 10,15,12,20,18,22,19,17,21,16,14,23,25,20,18,19,21,22,20,18,17"></textarea>
+                <!-- Demand History -->
+                <div class="section">
+                    <div class="section-header">
+                        <span class="section-icon">📉</span>
+                        <h2 class="section-title">Demand History (Optional)</h2>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Historical Demand Data</label>
+                        <textarea name="demandHistory" class="form-textarea" placeholder="Enter comma-separated values (e.g., 10,15,12,20,18,22)"></textarea>
+                        <p class="form-hint">Add historical demand data to improve forecasting accuracy</p>
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-4 pt-6">
-                    <button type="submit"
-                        class="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white px-8 py-4 rounded-full font-bold hover:shadow-2xl transition-all duration-200 hover:scale-105 active:scale-95">
-                        ✅ Add Product
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="check" style="width: 20px; height: 20px;"></i>
+                        <span>Add Product</span>
                     </button>
-                    <a href="/"
-                        class="flex-1 bg-gray-200 text-gray-700 px-8 py-4 rounded-full font-bold hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 text-center">
-                        ❌ Cancel
+                    <a href="/inventory/list" class="btn btn-secondary">
+                        <i data-feather="x" style="width: 20px; height: 20px;"></i>
+                        <span>Cancel</span>
                     </a>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+        feather.replace();
+    </script>
 </body>
 </html>

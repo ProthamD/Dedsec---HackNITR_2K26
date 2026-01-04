@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management - Inventree</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --bg-primary: hsl(240, 6%, 10%);
+            --bg-card: hsl(240, 5%, 12%);
+            --border: hsl(240, 4%, 20%);
+            --text-primary: hsl(0, 0%, 98%);
+            --text-muted: hsl(240, 5%, 64%);
+            --accent-green: hsl(142, 70%, 45%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--bg-card);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+        }
+
+        header h1 span.green {
+            color: var(--accent-green);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: var(--border);
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #4caf50;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-green), #4caf50);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-info h3 {
+            font-size: 2em;
+            color: var(--accent-green);
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+
+        .search-filter {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .inventory-table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-primary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        thead th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-green);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        tbody td {
+            padding: 15px;
+            color: var(--text-primary);
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .stock-low {
+            background: rgba(239, 68, 68, 0.2);
+            color: rgb(239, 68, 68);
+        }
+
+        .stock-medium {
+            background: rgba(255, 217, 61, 0.2);
+            color: #ffd93d;
+        }
+
+        .stock-good {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-green);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .btn-edit {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+
+        .btn-edit:hover {
+            background: rgba(33, 150, 243, 0.2);
+            transform: scale(1.1);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(239, 68, 68);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .notification.error {
+            border-left: 4px solid rgb(239, 68, 68);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>
+            <i data-feather="package" style="width: 28px; height: 28px; vertical-align: middle; margin-right: 8px;"></i>
+            Inventory <span class="green">Management</span>
+        </h1>
+        <div class="header-actions">
+            <a href="/" class="btn">
+                <i data-feather="home" style="width: 18px; height: 18px;"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/inventory/add" class="btn btn-primary">
+                <i data-feather="plus" style="width: 18px; height: 18px;"></i>
+                <span>Add Product</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i data-feather="package" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalProducts">-</h3>
+                    <p>Total Products</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i data-feather="alert-triangle" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="lowStockCount">-</h3>
+                    <p>Low Stock Items</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i data-feather="bar-chart-2" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalValue">$-</h3>
+                    <p>Total Inventory Value</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i data-feather="refresh-cw" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="avgTurnover">-</h3>
+                    <p>Avg Days of Cover</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="search-filter">
+            <div class="search-box">
+                <i data-feather="search" style="width: 18px; height: 18px; color: var(--text-muted);"></i>
+                <input type="text" id="searchInput" placeholder="Search by SKU or product name...">
+            </div>
+            <select id="stockFilter" class="filter-select">
+                <option value="all">All Stock Levels</option>
+                <option value="low">Low Stock (<10)</option>
+                <option value="medium">Medium Stock (10-50)</option>
+                <option value="good">Good Stock (>50)</option>
+            </select>
+            <select id="sortBy" class="filter-select">
+                <option value="name">Sort by Name</option>
+                <option value="sku">Sort by SKU</option>
+                <option value="stock">Sort by Stock</option>
+                <option value="value">Sort by Value</option>
+            </select>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="inventory-table-wrapper">
+            <div id="tableContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <i data-feather="check-circle" style="width: 20px; height: 20px;"></i>
+        <span id="notificationText">Action completed</span>
+    </div>
+
+    <script>
+        feather.replace();
+
+        let inventory = [];
+        let filteredInventory = [];
+
+        // Load inventory data
+        async function loadInventory() {
+            try {
+                const response = await fetch('/api/inventory?userId=user123');
+                const data = await response.json();
+                inventory = data;
+                filteredInventory = data;
+                updateStats();
+                renderTable();
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+                showNotification('Failed to load inventory', 'error');
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalProducts = inventory.length;
+            const lowStockCount = inventory.filter(item => item.onHand < 10).length;
+            const totalValue = inventory.reduce((sum, item) => sum + (item.onHand * item.unitCost), 0);
+            
+            let totalDoC = 0;
+            let countWithVelocity = 0;
+            inventory.forEach(item => {
+                const velocity = calculateVelocity(item);
+                if (velocity > 0) {
+                    totalDoC += item.onHand / velocity;
+                    countWithVelocity++;
+                }
+            });
+            const avgDaysOfCover = countWithVelocity > 0 ? Math.round(totalDoC / countWithVelocity) : 0;
+
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('lowStockCount').textContent = lowStockCount;
+            document.getElementById('totalValue').textContent = '$' + totalValue.toLocaleString();
+            document.getElementById('avgTurnover').textContent = avgDaysOfCover + ' days';
+        }
+
+        // Calculate velocity
+        function calculateVelocity(item) {
+            if (!item.demandHistory || item.demandHistory.length === 0) return 0;
+            const totalSold = item.demandHistory.reduce((sum, d) => sum + d.unitsSold, 0);
+            return totalSold / item.demandHistory.length;
+        }
+
+        // Get stock level class
+        function getStockLevel(quantity) {
+            if (quantity < 10) return { class: 'stock-low', label: 'Low' };
+            if (quantity < 50) return { class: 'stock-medium', label: 'Medium' };
+            return { class: 'stock-good', label: 'Good' };
+        }
+
+        // Render table
+        function renderTable() {
+            const tableContent = document.getElementById('tableContent');
+
+            if (filteredInventory.length === 0) {
+                tableContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i data-feather="inbox" style="width: 80px; height: 80px; color: var(--text-muted);"></i>
+                        </div>
+                        <h3>No Products Found</h3>
+                        <p>Add your first product to get started with inventory management</p>
+                        <a href="/inventory/add" class="btn btn-primary">
+                            <i data-feather="plus" style="width: 18px; height: 18px;"></i>
+                            <span>Add Product</span>
+                        </a>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+
+            const tableHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Name</th>
+                                <th>Location</th>
+                                <th>On Hand</th>
+                                <th>Unit Cost</th>
+                                <th>Total Value</th>
+                                <th>Stock Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredInventory.map(item => {
+                                const stockLevel = getStockLevel(item.onHand);
+                                const totalValue = item.onHand * item.unitCost;
+                                return `
+                                    <tr>
+                                        <td><strong>${item.sku}</strong></td>
+                                        <td>${item.name}</td>
+                                        <td>${item.location}</td>
+                                        <td><strong>${item.onHand}</strong> units</td>
+                                        <td>$${item.unitCost.toFixed(2)}</td>
+                                        <td>$${totalValue.toLocaleString()}</td>
+                                        <td>
+                                            <span class="stock-badge ${stockLevel.class}">
+                                                ${stockLevel.label}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <div class="btn-icon btn-edit" onclick="editProduct('${item._id}')" title="Edit">
+                                                    <i data-feather="edit-2" style="width: 16px; height: 16px;"></i>
+                                                </div>
+                                                <div class="btn-icon btn-delete" onclick="deleteProduct('${item._id}', '${item.name}')" title="Delete">
+                                                    <i data-feather="trash-2" style="width: 16px; height: 16px;"></i>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            tableContent.innerHTML = tableHTML;
+            feather.replace();
+        }
+
+        // Filter and sort
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const stockFilter = document.getElementById('stockFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Filter
+            filteredInventory = inventory.filter(item => {
+                const matchesSearch = item.sku.toLowerCase().includes(searchTerm) || 
+                                    item.name.toLowerCase().includes(searchTerm);
+                
+                let matchesStock = true;
+                if (stockFilter === 'low') matchesStock = item.onHand < 10;
+                if (stockFilter === 'medium') matchesStock = item.onHand >= 10 && item.onHand <= 50;
+                if (stockFilter === 'good') matchesStock = item.onHand > 50;
+
+                return matchesSearch && matchesStock;
+            });
+
+            // Sort
+            filteredInventory.sort((a, b) => {
+                switch(sortBy) {
+                    case 'sku': return a.sku.localeCompare(b.sku);
+                    case 'stock': return b.onHand - a.onHand;
+                    case 'value': return (b.onHand * b.unitCost) - (a.onHand * a.unitCost);
+                    default: return a.name.localeCompare(b.name);
+                }
+            });
+
+            renderTable();
+        }
+
+        // Edit product
+        function editProduct(id) {
+            window.location.href = `/inventory/edit/${id}`;
+        }
+
+        // Delete product
+        async function deleteProduct(id, name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/inventory/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showNotification(`"${name}" deleted successfully`, 'success');
+                    loadInventory(); // Reload data
+                } else {
+                    showNotification(data.message || 'Failed to delete product', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification('Failed to delete product', 'error');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.className = `notification ${type} show`;
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('stockFilter').addEventListener('change', applyFilters);
+        document.getElementById('sortBy').addEventListener('change', applyFilters);
+
+        // Load data on page load
+        loadInventory();
+    </script>
+</body>
+</html>

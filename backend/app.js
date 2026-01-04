@@ -254,10 +254,72 @@ app.post("/inventory/add", async (req, res) => {
         const inventory = new Inventory(inventoryData);
         await inventory.save();
         
-        res.redirect("/");
+        res.redirect("/inventory/list");
     } catch (error) {
         console.error("Error adding inventory:", error);
         res.status(500).send("Error adding inventory: " + error.message);
+    }
+});
+
+// View all inventory (list page)
+app.get("/inventory/list", (req, res) => {
+    res.render("inventory-list");
+});
+
+// Edit inventory page - GET
+app.get("/inventory/edit/:id", async (req, res) => {
+    try {
+        const product = await Inventory.findById(req.params.id).lean();
+        
+        if (!product) {
+            return res.status(404).send("Product not found");
+        }
+        
+        res.render("edit", { product });
+    } catch (error) {
+        console.error("Error loading product for edit:", error);
+        res.status(500).send("Error loading product: " + error.message);
+    }
+});
+
+// Edit inventory - POST
+app.post("/inventory/edit/:id", async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        
+        // Parse demand history if provided
+        if (req.body.demandHistory && req.body.demandHistory.trim()) {
+            const demandValues = req.body.demandHistory.split(',').map(v => v.trim());
+            updateData.demandHistory = demandValues.map((demand, index) => ({
+                date: new Date(Date.now() - (demandValues.length - index) * 24 * 60 * 60 * 1000),
+                unitsSold: parseInt(demand) || 0
+            }));
+        } else {
+            updateData.demandHistory = [];
+        }
+        
+        await Inventory.findByIdAndUpdate(req.params.id, updateData);
+        
+        res.redirect("/inventory/list");
+    } catch (error) {
+        console.error("Error updating inventory:", error);
+        res.status(500).send("Error updating inventory: " + error.message);
+    }
+});
+
+// Delete inventory - DELETE API
+app.delete("/api/inventory/:id", async (req, res) => {
+    try {
+        const product = await Inventory.findByIdAndDelete(req.params.id);
+        
+        if (!product) {
+            return res.json({ success: false, message: "Product not found" });
+        }
+        
+        res.json({ success: true, message: "Product deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting inventory:", error);
+        res.status(500).json({ success: false, message: "Error deleting product: " + error.message });
     }
 });
 
