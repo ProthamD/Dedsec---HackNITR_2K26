@@ -3,9 +3,14 @@ const app = express();
 const path = require("path");
 require("dotenv").config();
 const cors = require("cors");
+const mongoose = require("mongoose");
 const Inventory = require("./models/Inventory");
 const AgentMemory = require("./models/AgentMemory");
 const Action = require("./models/Action");
+const User = require("./models/user");
+const bcrypt = require("bcrypt");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const https = require('https');
 
 // ShipEngine API helper function
@@ -91,6 +96,19 @@ async function getShippingCosts(originZip, destinationZip, weight = 5) {
     });
 }
 
+// Connect to MongoDB
+async function connectDB() {
+    try {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/inventree');
+        console.log("MongoDB connected successfully");
+    } catch (err) {
+        console.error("MongoDB connection failed:", err);
+        process.exit(1);
+    }
+}
+
+connectDB();
+
 // middlewares
 app.use(cors());
 app.use(express.json());
@@ -98,14 +116,107 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 
+// Session configuration
+app.use(session({
+    secret: process.env.JWT_SECRET || 'inventree-secret-key-2026',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/inventree'
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+    }
+}));
+
+// Add user to response locals for templates
+app.use((req, res, next) => {
+    res.locals.user = req.session.userId;
+    next();
+});
 
 
+
+
+// Authentication Routes
+app.get("/signup", (req, res) => {
+    if (req.session.userId) {
+        return res.redirect("/");
+    }
+    res.render("signup", { error: null });
+});
+
+app.post("/signup", async (req, res) => {
+    try {
+        const { email, password, confirmPassword, businessName } = req.body;
+        
+        if (password !== confirmPassword) {
+            return res.render("signup", { error: "Passwords do not match" });
+        }
+        
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.render("signup", { error: "Email already registered" });
+        }
+        
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({
+            email,
+            password: hashedPassword,
+            businessName: businessName || ""
+        });
+        
+        await user.save();
+        req.session.userId = user._id.toString();
+        res.redirect("/");
+    } catch (error) {
+        console.error("Signup error:", error);
+        res.render("signup", { error: "Registration failed. Please try again." });
+    }
+});
+
+app.get("/signin", (req, res) => {
+    if (req.session.userId) {
+        return res.redirect("/");
+    }
+    res.render("signin", { error: null });
+});
+
+app.post("/signin", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.render("signin", { error: "Invalid email or password" });
+        }
+        
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            return res.render("signin", { error: "Invalid email or password" });
+        }
+        
+        req.session.userId = user._id.toString();
+        res.redirect("/");
+    } catch (error) {
+        console.error("Signin error:", error);
+        res.render("signin", { error: "Sign in failed. Please try again." });
+    }
+});
+
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/signin");
+});
 
 // routes and workers
 // Home route - Check if user has inventory
 app.get("/", async (req, res) => {
-    // TODO: Get userId from session/auth (hardcoded for now)
-    const userId = "user123";
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    const userId = req.session.userId;
     
     try {
         // Query MongoDB for user's inventory
@@ -216,8 +327,11 @@ app.get("/AddData", (req, res) => {
 
 // Get inventory API
 app.get("/api/inventory", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = req.query.userId || "user123";
+    const userId = req.session.userId || req.query.userId;
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
     
     try {
         const inventoryData = await Inventory.find({ userId }).lean();
@@ -235,8 +349,11 @@ app.get("/inventory/add", (req, res) => {
 
 // Add inventory POST
 app.post("/inventory/add", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = "user123";
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    const userId = req.session.userId;
     
     try {
         const inventoryData = { ...req.body, userId };
@@ -326,8 +443,11 @@ app.delete("/api/inventory/:id", async (req, res) => {
 
 // Management Center route
 app.get("/management", async (req, res) => {
-    // TODO: Get userId from session/auth
-    const userId = "user123";
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    const userId = req.session.userId;
     
     try {
         // Get inventory data
@@ -394,7 +514,11 @@ app.get("/management", async (req, res) => {
 
 // Action approval page - AI suggested actions
 app.get("/action", async (req, res) => {
-    const userId = "user123";
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    const userId = req.session.userId;
     
     try {
         // Get all pending actions
@@ -432,7 +556,7 @@ app.get("/action", async (req, res) => {
 
 // Generate AI action suggestions
 app.post("/api/actions/generate", async (req, res) => {
-    const userId = "user123";
+    const userId = req.session.userId || "user123";
     
     try {
         // Get all inventory items
@@ -574,7 +698,7 @@ app.post("/api/actions/approve/:id", async (req, res) => {
         
         action.status = 'APPROVED';
         action.approvedAt = new Date();
-        action.approvedBy = "user123";
+        action.approvedBy = req.session.userId || "system";
         action.notes = req.body.notes || '';
         
         await action.save();
@@ -643,7 +767,11 @@ app.post("/api/actions/execute/:id", async (req, res) => {
 
 // Reduce Waste page route
 app.get("/reduce-waste", async (req, res) => {
-    const userId = "user123";
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    const userId = req.session.userId;
     
     try {
         // Find overstocked items
@@ -944,8 +1072,12 @@ app.post("/api/distribute-stock", async (req, res) => {
 
 // Route: Alert page with warehouse map and news
 app.get("/alert", async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
     try {
-        const userId = 'user123';
+        const userId = req.session.userId;
         
         // Fetch inventory from MongoDB
         const inventory = await Inventory.find({ userId }).lean();
@@ -1051,7 +1183,7 @@ app.post("/api/analyze-disaster", async (req, res) => {
     try {
         console.log("Starting disaster analysis for user:", userId);
         
-        const inventory = await Inventory.find({ userId: userId || 'user123' }).lean();
+        const inventory = await Inventory.find({ userId: req.session.userId || userId || 'user123' }).lean();
         
         // Generate intelligent disaster analysis based on actual inventory data
         const disasters = [{
@@ -1207,8 +1339,13 @@ let warehouseTransfers = [];
 
 // API: Get excess stock available for transfer
 app.get("/api/warehouse-excess-stock", async (req, res) => {
+    const userId = req.session.userId;
+    
+    if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+    
     try {
-        const userId = 'user123';
         const inventory = await Inventory.find({ userId }).lean();
         
         // Find items with excess stock (more than 30 days supply)
