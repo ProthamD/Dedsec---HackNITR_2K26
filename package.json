@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node start-merged.js",
     "dev": "node start-merged.js",
-    "build": "npm install && cd backend && npm install && cd ../Inventree && npm install",
+    "build": "npm install && cd backend && npm install && cd ../Inventree && npm install && npm run build",
     "backend": "cd backend && npm start",
     "mastra": "cd Inventree && npm start"
   },
