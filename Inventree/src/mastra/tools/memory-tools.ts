@@ -1,4 +1,5 @@
-import { Agent, Tool } from '@mastra/core';
+import { Agent } from '@mastra/core/agent';
+import { Tool } from '@mastra/core/tools';
 
 // Tool to query past agent decisions and their outcomes
 export const queryMemoryTool = new Tool({
