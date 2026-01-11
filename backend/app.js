@@ -4,7 +4,7 @@ const path = require("path");
 require("dotenv").config();
 const cors = require("cors");
 const mongoose = require("mongoose");
-const Inventory = require("./models/Inventory");
+const Inventory = require("./models/inventory");
 const AgentMemory = require("./models/AgentMemory");
 const Action = require("./models/Action");
 const User = require("./models/user");
