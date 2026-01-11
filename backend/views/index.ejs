@@ -26,6 +26,29 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 px-4 py-3" style="background: hsla(240, 5%, 12%, 0.8); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border);">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 text-xl font-bold" style="color: var(--text-primary); text-decoration: none;">
+                <span>📦</span>
+                <span>Inven<span style="color: var(--accent-green);">tree</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="/profile" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:bg-opacity-10" style="color: var(--text-muted); text-decoration: none; border: 1px solid var(--border);">
+                    <i data-feather="user" style="width: 18px; height: 18px;"></i>
+                    <span class="hidden sm:inline">Profile</span>
+                </a>
+                <a href="/logout" onclick="return confirm('Are you sure you want to logout?')" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-all" style="background: rgba(239, 68, 68, 0.1); color: rgb(239, 68, 68); text-decoration: none; border: 1px solid rgba(239, 68, 68, 0.3);">
+                    <i data-feather="log-out" style="width: 18px; height: 18px;"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add padding to account for fixed nav -->
+    <div style="padding-top: 60px;">
+    
     <% if (!hasInventory) { %>
         <!-- No Inventory State -->
         <div class="flex items-center justify-center min-h-screen px-4">
@@ -220,8 +243,16 @@
         <!-- Hidden input for userId -->
         <input type="hidden" id="userId" value="<%= userId %>">
     <% } %>
+    
+    </div> <!-- Close padding div -->
 
     <script src="/js/chat.js"></script>
     <script src="/js/warehouse-network.js"></script>
+    <script>
+        // Initialize feather icons for navigation
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    </script>
 </body>
 </html>

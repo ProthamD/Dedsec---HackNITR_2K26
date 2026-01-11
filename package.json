@@ -1,4 +1,12 @@
 {
+  "name": "inventree-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node start-merged.js",
+    "build": "cd Inventree && npm run build",
+    "backend": "cd backend && npm start",
+    "mastra": "cd Inventree && npm start"
+  },
   "dependencies": {
     "cors": "^2.8.5"
   }

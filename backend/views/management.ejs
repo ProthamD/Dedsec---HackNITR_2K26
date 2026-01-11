@@ -63,57 +63,53 @@
                 <span>⚡</span> Quick Actions
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <% if (issues && issues.reduceWaste) { %>
-                    <button 
-                        onclick="handleIssue('reduceWaste')"
-                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
-                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid var(--border);">
-                        <i data-feather="trash-2" class="w-5 h-5" style="color: var(--accent-green);"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-semibold">Reduce Waste</div>
-                            <div class="text-xs" style="color: var(--text-muted);">Optimize stock levels</div>
-                        </div>
-                    </button>
-                <% } %>
+                <!-- Reduce Waste - Always visible -->
+                <button 
+                    onclick="handleIssue('reduceWaste')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg <%= (issues && issues.reduceWaste) ? '' : 'opacity-60' %>"
+                    style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid var(--border);">
+                    <i data-feather="trash-2" class="w-5 h-5" style="color: var(--accent-green);"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Reduce Waste</div>
+                        <div class="text-xs" style="color: var(--text-muted);"><%= (issues && issues.reduceWaste) ? 'Optimize stock levels' : 'No issues' %></div>
+                    </div>
+                </button>
 
-                <% if (issues && issues.alert) { %>
-                    <button 
-                        onclick="handleIssue('alert')"
-                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
-                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(234, 179, 8, 0.5);">
-                        <i data-feather="alert-triangle" class="w-5 h-5" style="color: rgb(234, 179, 8);"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-semibold">Alert!</div>
-                            <div class="text-xs" style="color: var(--text-muted);">Low stock warning</div>
-                        </div>
-                    </button>
-                <% } %>
+                <!-- Alert - Always visible -->
+                <button 
+                    onclick="handleIssue('alert')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg <%= (issues && issues.alert) ? '' : 'opacity-60' %>"
+                    style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(234, 179, 8, 0.5);">
+                    <i data-feather="alert-triangle" class="w-5 h-5" style="color: rgb(234, 179, 8);"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Alert!</div>
+                        <div class="text-xs" style="color: var(--text-muted);"><%= (issues && issues.alert) ? 'Low stock warning' : 'No alerts' %></div>
+                    </div>
+                </button>
 
-                <% if (issues && issues.changes) { %>
-                    <button 
-                        onclick="handleIssue('changes')"
-                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
-                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(59, 130, 246, 0.5);">
-                        <i data-feather="refresh-cw" class="w-5 h-5" style="color: rgb(59, 130, 246);"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-semibold">Changes</div>
-                            <div class="text-xs" style="color: var(--text-muted);">Demand volatility</div>
-                        </div>
-                    </button>
-                <% } %>
+                <!-- Changes - Always visible -->
+                <button 
+                    onclick="handleIssue('changes')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg <%= (issues && issues.changes) ? '' : 'opacity-60' %>"
+                    style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(59, 130, 246, 0.5);">
+                    <i data-feather="refresh-cw" class="w-5 h-5" style="color: rgb(59, 130, 246);"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Changes</div>
+                        <div class="text-xs" style="color: var(--text-muted);"><%= (issues && issues.changes) ? 'Demand volatility' : 'No changes' %></div>
+                    </div>
+                </button>
 
-                <% if (issues && issues.action) { %>
-                    <button 
-                        onclick="handleIssue('action')"
-                        class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
-                        style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(239, 68, 68, 0.5);">
-                        <i data-feather="zap" class="w-5 h-5" style="color: rgb(239, 68, 68);"></i>
-                        <div class="text-left">
-                            <div class="text-sm font-semibold">Action Required</div>
-                            <div class="text-xs" style="color: var(--text-muted);">Critical items</div>
-                        </div>
-                    </button>
-                <% } %>
+                <!-- Action Required - Always visible -->
+                <button 
+                    onclick="handleIssue('action')"
+                    class="group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all hover:scale-105 hover:shadow-lg <%= (issues && issues.action) ? '' : 'opacity-60' %>"
+                    style="background: hsl(0, 0%, 0%); color: hsl(0, 0%, 100%); border: 1px solid rgba(239, 68, 68, 0.5);">
+                    <i data-feather="zap" class="w-5 h-5" style="color: rgb(239, 68, 68);"></i>
+                    <div class="text-left">
+                        <div class="text-sm font-semibold">Action Required</div>
+                        <div class="text-xs" style="color: var(--text-muted);"><%= (issues && issues.action) ? 'Critical items' : 'No actions' %></div>
+                    </div>
+                </button>
 
                 <!-- Manage Inventory Button (Always visible) -->
                 <button 

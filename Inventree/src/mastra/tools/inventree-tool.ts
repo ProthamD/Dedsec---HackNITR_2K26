@@ -53,7 +53,8 @@ const buildSnapshot = async (
     
     // Find the matching item
     const item = inventoryData.find(
-      (item: any) => item.sku.toUpperCase() === sku.toUpperCase() && 
+      (item: any) => item.sku && item.location && 
+                    item.sku.toUpperCase() === sku.toUpperCase() && 
                     item.location.toLowerCase() === location.toLowerCase()
     );
 

@@ -38,6 +38,8 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         header h1 {
@@ -51,6 +53,7 @@
         .header-actions {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -77,6 +80,16 @@
             background: var(--accent-green);
             color: var(--bg-primary);
             border: none;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: rgb(239, 68, 68);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         .btn-primary:hover {
@@ -366,6 +379,14 @@
             <a href="/inventory/add" class="btn btn-primary">
                 <i data-feather="plus" style="width: 18px; height: 18px;"></i>
                 <span>Add Product</span>
+            </a>
+            <a href="/profile" class="btn">
+                <i data-feather="user" style="width: 18px; height: 18px;"></i>
+                <span>Profile</span>
+            </a>
+            <a href="/logout" onclick="return confirm('Are you sure you want to logout?')" class="btn btn-danger">
+                <i data-feather="log-out" style="width: 18px; height: 18px;"></i>
+                <span>Logout</span>
             </a>
         </div>
     </header>

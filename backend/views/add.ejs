@@ -210,6 +210,32 @@
                 font-size: 2em;
             }
         }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .mode-btn.active {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            border-color: var(--accent-green);
+        }
     </style>
 </head>
 <body>
@@ -219,7 +245,58 @@
             <p>Add new products to your inventory system</p>
         </header>
 
-        <div class="form-container">
+        <!-- Toggle between Form and JSON Upload -->
+        <div class="form-container" style="margin-bottom: 20px; padding: 20px;">
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button id="formModeBtn" class="mode-btn active" onclick="switchMode('form')">
+                    <i data-feather="edit-3" style="width: 18px; height: 18px;"></i>
+                    Form Entry
+                </button>
+                <button id="jsonModeBtn" class="mode-btn" onclick="switchMode('json')">
+                    <i data-feather="upload-cloud" style="width: 18px; height: 18px;"></i>
+                    JSON Upload
+                </button>
+            </div>
+        </div>
+
+        <!-- JSON Upload Section -->
+        <div id="jsonSection" class="form-container" style="display: none;">
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <h2 class="section-title">Upload JSON File</h2>
+                </div>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Upload a JSON file containing one or multiple products. Each product will be added to the inventory.
+                </p>
+                
+                <div class="form-group">
+                    <label class="form-label">Select JSON File <span class="required">*</span></label>
+                    <input type="file" id="jsonFile" accept=".json" class="form-input" style="padding: 10px;">
+                    <p class="form-hint">File should contain a single product object or an array of products</p>
+                </div>
+
+                <div id="jsonPreview" style="display: none; margin-top: 20px;">
+                    <label class="form-label">Preview:</label>
+                    <pre id="jsonPreviewContent" style="background: var(--bg-primary); padding: 16px; border-radius: 8px; border: 1px solid var(--border); color: var(--text-muted); overflow-x: auto; max-height: 300px;"></pre>
+                    <p id="productCount" style="color: var(--accent-green); margin-top: 10px;"></p>
+                </div>
+
+                <div class="button-group">
+                    <button id="uploadJsonBtn" class="btn btn-primary" onclick="uploadJSON()" disabled>
+                        <i data-feather="upload" style="width: 20px; height: 20px;"></i>
+                        <span>Upload Products</span>
+                    </button>
+                    <a href="/inventory/list" class="btn btn-secondary">
+                        <i data-feather="x" style="width: 20px; height: 20px;"></i>
+                        <span>Cancel</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Original Form Section -->
+        <div id="formSection" class="form-container">
             <form action="/inventory/add" method="POST">
                 <!-- Basic Information -->
                 <div class="section">
@@ -371,6 +448,102 @@
 
     <script>
         feather.replace();
+
+        // Mode switching
+        function switchMode(mode) {
+            const formSection = document.getElementById('formSection');
+            const jsonSection = document.getElementById('jsonSection');
+            const formModeBtn = document.getElementById('formModeBtn');
+            const jsonModeBtn = document.getElementById('jsonModeBtn');
+
+            if (mode === 'form') {
+                formSection.style.display = 'block';
+                jsonSection.style.display = 'none';
+                formModeBtn.classList.add('active');
+                jsonModeBtn.classList.remove('active');
+            } else {
+                formSection.style.display = 'none';
+                jsonSection.style.display = 'block';
+                formModeBtn.classList.remove('active');
+                jsonModeBtn.classList.add('active');
+                feather.replace();
+            }
+        }
+
+        // JSON file handling
+        document.getElementById('jsonFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const jsonData = JSON.parse(event.target.result);
+                    const preview = document.getElementById('jsonPreview');
+                    const previewContent = document.getElementById('jsonPreviewContent');
+                    const productCount = document.getElementById('productCount');
+                    const uploadBtn = document.getElementById('uploadJsonBtn');
+
+                    // Display preview
+                    previewContent.textContent = JSON.stringify(jsonData, null, 2);
+                    preview.style.display = 'block';
+
+                    // Count products
+                    const count = Array.isArray(jsonData) ? jsonData.length : 1;
+                    productCount.textContent = `✓ ${count} product${count > 1 ? 's' : ''} ready to upload`;
+
+                    // Enable upload button
+                    uploadBtn.disabled = false;
+                    uploadBtn.jsonData = jsonData;
+                } catch (error) {
+                    alert('Invalid JSON file. Please check the file format.');
+                    console.error('JSON parse error:', error);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Upload JSON data
+        async function uploadJSON() {
+            const uploadBtn = document.getElementById('uploadJsonBtn');
+            const jsonData = uploadBtn.jsonData;
+
+            if (!jsonData) {
+                alert('Please select a valid JSON file first.');
+                return;
+            }
+
+            try {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<span>Uploading...</span>';
+
+                const response = await fetch('/inventory/add/json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ products: Array.isArray(jsonData) ? jsonData : [jsonData] })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`Success! ${result.count} product(s) added to inventory.`);
+                    window.location.href = '/inventory/list';
+                } else {
+                    alert(`Error: ${result.error || 'Failed to add products'}`);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i data-feather="upload" style="width: 20px; height: 20px;"></i><span>Upload Products</span>';
+                    feather.replace();
+                }
+            } catch (error) {
+                alert('Failed to upload products. Please try again.');
+                console.error('Upload error:', error);
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i data-feather="upload" style="width: 20px; height: 20px;"></i><span>Upload Products</span>';
+                feather.replace();
+            }
+        }
     </script>
 </body>
 </html>

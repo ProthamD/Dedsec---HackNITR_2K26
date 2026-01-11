@@ -29,4 +29,5 @@ const inventorySchema = new mongoose.Schema({
     seasonalityMultiplier: { type: Number, default: 1 }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Inventory', inventorySchema);
+// Prevent model recompilation error
+module.exports = mongoose.models.Inventory || mongoose.model('Inventory', inventorySchema);

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: inventree-merged
+    runtime: node
+    buildCommand: npm install && cd backend && npm install && cd ../Inventree && npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: MASTRA_URL
+        value: http://localhost:4111

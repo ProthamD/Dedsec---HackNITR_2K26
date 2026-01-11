@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: inventree-mastra
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4111
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false

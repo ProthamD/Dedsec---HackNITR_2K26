@@ -209,6 +209,39 @@ app.get("/logout", (req, res) => {
     res.redirect("/signin");
 });
 
+// Profile route
+app.get("/profile", async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect("/signup");
+    }
+    
+    try {
+        const userId = req.session.userId;
+        
+        // Get user details
+        const user = await User.findById(userId).lean();
+        
+        if (!user) {
+            return res.redirect("/signup");
+        }
+        
+        // Get inventory statistics
+        const inventory = await Inventory.find({ userId }).lean();
+        
+        const stats = {
+            totalProducts: inventory.length,
+            totalStock: inventory.reduce((sum, item) => sum + (item.onHand || 0), 0),
+            totalValue: inventory.reduce((sum, item) => sum + ((item.onHand || 0) * (item.unitCost || 0)), 0),
+            lowStockItems: inventory.filter(item => item.onHand < 10).length
+        };
+        
+        res.render("profile", { user, stats });
+    } catch (error) {
+        console.error("Profile error:", error);
+        res.status(500).send("Error loading profile");
+    }
+});
+
 // routes and workers
 // Home route - Check if user has inventory
 app.get("/", async (req, res) => {
@@ -285,39 +318,54 @@ app.get("/", async (req, res) => {
     }
 });
 
-// Chat API - Proxy to Mastra AI
+// Chat API - Calls deployed Mastra agent with local fallback
+const { handleChat } = require('./services/chat-handler');
+
 app.post("/api/chat", async (req, res) => {
     const { message, userId } = req.body;
+    const sessionUserId = req.session?.userId || userId;
+    
+    const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
     
     try {
-        // Forward request to Mastra AI agent
-        const response = await fetch("http://localhost:4111/api/agents/inventoryAgent/generate", {
+        console.log(`💬 Chat request from user ${sessionUserId}: "${message}"`);
+        console.log(`📡 Attempting to call Mastra at ${mastraUrl}`);
+        
+        // Try to forward request to Mastra AI agent
+        const response = await fetch(`${mastraUrl}/api/agents/inventoryAgent/generate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 messages: [{ role: "user", content: message }],
-                resourceid: userId
-            })
+                resourceid: sessionUserId
+            }),
+            signal: AbortSignal.timeout(40000) // 40 second timeout for AI processing
         });
         
-        // Check if response is ok
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Mastra error response:", errorText);
-            return res.status(500).json({ 
-                error: "Mastra AI error",
-                message: `Mastra returned ${response.status}: ${errorText.substring(0, 200)}` 
-            });
+            throw new Error(`Mastra returned ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('✅ Mastra response received');
         res.json(data);
     } catch (error) {
-        console.error("Error communicating with Mastra:", error);
-        res.status(500).json({ 
-            error: "Failed to communicate with AI agent",
-            message: "Make sure Mastra is running on port 4111. Error: " + error.message 
-        });
+        console.log(`⚠️ Mastra unavailable (${error.message}), using local handler`);
+        
+        // Fallback to local chat handler
+        try {
+            const response = await handleChat(message, sessionUserId);
+            res.json({
+                text: response.text,
+                data: response.data || null
+            });
+        } catch (localError) {
+            console.error("Local chat handler error:", localError);
+            res.status(500).json({ 
+                error: "Chat processing failed",
+                message: localError.message 
+            });
+        }
     }
 });
 
@@ -334,7 +382,15 @@ app.get("/api/inventory", async (req, res) => {
     }
     
     try {
-        const inventoryData = await Inventory.find({ userId }).lean();
+        let query = {};
+        
+        // If userId looks like an ObjectId (24 hex chars), use it as-is
+        // Otherwise, don't filter by userId and return all inventory
+        if (/^[0-9a-fA-F]{24}$/.test(userId)) {
+            query = { userId };
+        }
+        
+        const inventoryData = await Inventory.find(query).lean();
         res.json(inventoryData);
     } catch (error) {
         console.error("Error fetching inventory:", error);
@@ -376,6 +432,55 @@ app.post("/inventory/add", async (req, res) => {
     } catch (error) {
         console.error("Error adding inventory:", error);
         res.status(500).send("Error adding inventory: " + error.message);
+    }
+});
+
+// Add inventory from JSON (bulk upload)
+app.post("/inventory/add/json", async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+    
+    const userId = req.session.userId;
+    
+    try {
+        const { products } = req.body;
+        
+        if (!products || !Array.isArray(products) || products.length === 0) {
+            return res.status(400).json({ error: "Invalid products array" });
+        }
+        
+        // Process each product
+        const processedProducts = products.map(product => {
+            const inventoryData = { ...product, userId };
+            
+            // Ensure demandHistory is properly formatted
+            if (product.demandHistory && Array.isArray(product.demandHistory)) {
+                inventoryData.demandHistory = product.demandHistory.map(entry => ({
+                    date: entry.date ? new Date(entry.date) : new Date(),
+                    unitsSold: parseInt(entry.unitsSold) || 0
+                }));
+            } else {
+                inventoryData.demandHistory = [];
+            }
+            
+            return inventoryData;
+        });
+        
+        // Insert all products
+        const result = await Inventory.insertMany(processedProducts);
+        
+        res.json({ 
+            success: true, 
+            count: result.length,
+            message: `${result.length} product(s) added successfully` 
+        });
+    } catch (error) {
+        console.error("Error adding products from JSON:", error);
+        res.status(500).json({ 
+            error: "Failed to add products",
+            message: error.message 
+        });
     }
 });
 
@@ -887,10 +992,12 @@ app.post("/api/ai-distribute-recommendation", async (req, res) => {
     
     console.log('🤖 AI Distribution Request:', { productSku, productName, excessStock, warehouseCount: warehouses?.length });
     
+    const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
+    
     try {
         // Call Mastra AI agent with waste distribution tool
-        console.log('📡 Calling Mastra AI at http://localhost:4111...');
-        const aiResponse = await fetch("http://localhost:4111/api/agents/inventoryAgent/generate", {
+        console.log(`📡 Calling Mastra AI at ${mastraUrl}...`);
+        const aiResponse = await fetch(`${mastraUrl}/api/agents/inventoryAgent/generate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1237,9 +1344,11 @@ app.post("/api/analyze-disaster", async (req, res) => {
 app.post("/api/generate-waste-plans", async (req, res) => {
     const { productSku, productName, excessStock, unitCost, userId } = req.body;
     
+    const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
+    
     try {
         // Call Mastra AI agent for plan generation
-        const aiResponse = await fetch("http://localhost:4111/api/agents/inventoryAgent/generate", {
+        const aiResponse = await fetch(`${mastraUrl}/api/agents/inventoryAgent/generate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
