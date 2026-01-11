@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Inventory = require('./models/Inventory');
+const Inventory = require('./models/inventory');
 const fs = require('fs');
 const path = require('path');
 
