@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "mastra dev --port 4111",
+    "dev": "PORT=4111 mastra dev",
     "build": "mastra build",
-    "start": "mastra start --port 4111"
+    "start": "PORT=4111 mastra start"
   },
   "keywords": [],
   "author": "",
