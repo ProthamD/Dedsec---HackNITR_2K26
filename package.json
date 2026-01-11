@@ -1,11 +1,17 @@
 {
   "name": "inventree-app",
   "version": "1.0.0",
+  "description": "Merged Inventree deployment - backend + Mastra AI",
+  "main": "start-merged.js",
   "scripts": {
     "start": "node start-merged.js",
-    "build": "cd Inventree && npm run build",
+    "dev": "node start-merged.js",
+    "build": "npm install && cd backend && npm install && cd ../Inventree && npm install",
     "backend": "cd backend && npm start",
     "mastra": "cd Inventree && npm start"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "cors": "^2.8.5"
