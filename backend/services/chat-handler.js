@@ -4,7 +4,7 @@
  * Provides inventory-related responses using local data and logic
  */
 
-const Inventory = require('../models/inventory');
+const Inventory = require('../models/Inventory');
 
 /**
  * Process a chat message and return an appropriate response
