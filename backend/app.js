@@ -16,12 +16,12 @@ const https = require('https');
 // ShipEngine API helper function
 async function getShippingCosts(originZip, destinationZip, weight = 5) {
     const apiKey = process.env.SHIPENGINE_API_KEY;
-    
+
     // If no API key, return null to trigger fallback
     if (!apiKey || apiKey === 'your_shipengine_api_key_here') {
         return null;
     }
-    
+
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({
             rate_options: {
@@ -44,7 +44,7 @@ async function getShippingCosts(originZip, destinationZip, weight = 5) {
                 }]
             }
         });
-        
+
         const options = {
             hostname: 'api.shipengine.com',
             path: '/v1/rates',
@@ -55,19 +55,19 @@ async function getShippingCosts(originZip, destinationZip, weight = 5) {
                 'Content-Length': data.length
             }
         };
-        
+
         const req = https.request(options, (res) => {
             let body = '';
-            
+
             res.on('data', (chunk) => {
                 body += chunk;
             });
-            
+
             res.on('end', () => {
                 try {
                     const response = JSON.parse(body);
                     if (response.rate_response?.rates?.length > 0) {
-                        const cheapestRate = response.rate_response.rates.reduce((min, rate) => 
+                        const cheapestRate = response.rate_response.rates.reduce((min, rate) =>
                             rate.shipping_amount.amount < min.shipping_amount.amount ? rate : min
                         );
                         resolve(cheapestRate.shipping_amount.amount);
@@ -80,17 +80,17 @@ async function getShippingCosts(originZip, destinationZip, weight = 5) {
                 }
             });
         });
-        
+
         req.on('error', (e) => {
             console.error('ShipEngine API error:', e.message);
             resolve(null);
         });
-        
+
         req.setTimeout(5000, () => {
             req.destroy();
             resolve(null);
         });
-        
+
         req.write(data);
         req.end();
     });
@@ -114,6 +114,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/images', express.static(path.join(__dirname, "images")));
 app.set("view engine", "ejs");
 
 // Session configuration
@@ -149,23 +150,23 @@ app.get("/signup", (req, res) => {
 app.post("/signup", async (req, res) => {
     try {
         const { email, password, confirmPassword, businessName } = req.body;
-        
+
         if (password !== confirmPassword) {
             return res.render("signup", { error: "Passwords do not match" });
         }
-        
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.render("signup", { error: "Email already registered" });
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({
             email,
             password: hashedPassword,
             businessName: businessName || ""
         });
-        
+
         await user.save();
         req.session.userId = user._id.toString();
         res.redirect("/");
@@ -185,17 +186,17 @@ app.get("/signin", (req, res) => {
 app.post("/signin", async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+
         const user = await User.findOne({ email });
         if (!user) {
             return res.render("signin", { error: "Invalid email or password" });
         }
-        
+
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
             return res.render("signin", { error: "Invalid email or password" });
         }
-        
+
         req.session.userId = user._id.toString();
         res.redirect("/");
     } catch (error) {
@@ -214,27 +215,27 @@ app.get("/profile", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     try {
         const userId = req.session.userId;
-        
+
         // Get user details
         const user = await User.findById(userId).lean();
-        
+
         if (!user) {
             return res.redirect("/signup");
         }
-        
+
         // Get inventory statistics
         const inventory = await Inventory.find({ userId }).lean();
-        
+
         const stats = {
             totalProducts: inventory.length,
             totalStock: inventory.reduce((sum, item) => sum + (item.onHand || 0), 0),
             totalValue: inventory.reduce((sum, item) => sum + ((item.onHand || 0) * (item.unitCost || 0)), 0),
             lowStockItems: inventory.filter(item => item.onHand < 10).length
         };
-        
+
         res.render("profile", { user, stats });
     } catch (error) {
         console.error("Profile error:", error);
@@ -243,20 +244,20 @@ app.get("/profile", async (req, res) => {
 });
 
 // routes and workers
-// Home route - Check if user has inventory
+// Home route - Show landing page for non-logged-in users, dashboard for logged-in users
 app.get("/", async (req, res) => {
     if (!req.session.userId) {
-        return res.redirect("/signup");
+        return res.render("landing");
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         // Query MongoDB for user's inventory
         const inventory = await Inventory.find({ userId }).lean();
         const inventoryCount = inventory.length;
         const hasInventory = inventoryCount > 0;
-        
+
         // Analyze inventory to detect issues for management center
         const issues = {
             reduceWaste: false,
@@ -264,21 +265,21 @@ app.get("/", async (req, res) => {
             changes: false,
             action: false
         };
-        
+
         let issueCount = 0;
-        
+
         if (hasInventory) {
             inventory.forEach(item => {
                 // Check for overstocked items (waste reduction needed)
                 if (item.onHand > 60) {
                     issues.reduceWaste = true;
                 }
-                
+
                 // Check for low stock alerts
                 if (item.onHand < 10) {
                     issues.alert = true;
                 }
-                
+
                 // Check for items with high demand variability (changes needed)
                 if (item.demandHistory && item.demandHistory.length > 0) {
                     const demands = item.demandHistory.map(d => d.unitsSold);
@@ -288,32 +289,32 @@ app.get("/", async (req, res) => {
                         issues.changes = true;
                     }
                 }
-                
+
                 // Check for items needing immediate action (critical stock or budget issues)
                 if (item.onHand < 5 || (item.unitCost * item.moq > item.budgetCap)) {
                     issues.action = true;
                 }
             });
-            
+
             // Count active issues
             issueCount = Object.values(issues).filter(Boolean).length;
         }
-        
-        res.render("index", { 
-            hasInventory, 
+
+        res.render("index", {
+            hasInventory,
             inventoryCount,
             issues,
             issueCount,
-            userId 
+            userId
         });
     } catch (error) {
         console.error("Error fetching inventory:", error);
-        res.render("index", { 
-            hasInventory: false, 
+        res.render("index", {
+            hasInventory: false,
             inventoryCount: 0,
             issues: {},
             issueCount: 0,
-            userId 
+            userId
         });
     }
 });
@@ -324,13 +325,13 @@ const { handleChat } = require('./services/chat-handler');
 app.post("/api/chat", async (req, res) => {
     const { message, userId } = req.body;
     const sessionUserId = req.session?.userId || userId;
-    
+
     const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
-    
+
     try {
         console.log(`💬 Chat request from user ${sessionUserId}: "${message}"`);
         console.log(`📡 Attempting to call Mastra at ${mastraUrl}`);
-        
+
         // Try to forward request to Mastra AI agent
         const response = await fetch(`${mastraUrl}/api/agents/inventoryAgent/generate`, {
             method: "POST",
@@ -341,17 +342,17 @@ app.post("/api/chat", async (req, res) => {
             }),
             signal: AbortSignal.timeout(40000) // 40 second timeout for AI processing
         });
-        
+
         if (!response.ok) {
             throw new Error(`Mastra returned ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('✅ Mastra response received');
         res.json(data);
     } catch (error) {
         console.log(`⚠️ Mastra unavailable (${error.message}), using local handler`);
-        
+
         // Fallback to local chat handler
         try {
             const response = await handleChat(message, sessionUserId);
@@ -361,9 +362,9 @@ app.post("/api/chat", async (req, res) => {
             });
         } catch (localError) {
             console.error("Local chat handler error:", localError);
-            res.status(500).json({ 
+            res.status(500).json({
                 error: "Chat processing failed",
-                message: localError.message 
+                message: localError.message
             });
         }
     }
@@ -376,20 +377,20 @@ app.get("/AddData", (req, res) => {
 // Get inventory API
 app.get("/api/inventory", async (req, res) => {
     const userId = req.session.userId || req.query.userId;
-    
+
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
     try {
         let query = {};
-        
+
         // If userId looks like an ObjectId (24 hex chars), use it as-is
         // Otherwise, don't filter by userId and return all inventory
         if (/^[0-9a-fA-F]{24}$/.test(userId)) {
             query = { userId };
         }
-        
+
         const inventoryData = await Inventory.find(query).lean();
         res.json(inventoryData);
     } catch (error) {
@@ -408,12 +409,12 @@ app.post("/inventory/add", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         const inventoryData = { ...req.body, userId };
-        
+
         // Parse demand history if provided
         if (req.body.demandHistory && req.body.demandHistory.trim()) {
             const demandValues = req.body.demandHistory.split(',').map(v => v.trim());
@@ -424,10 +425,10 @@ app.post("/inventory/add", async (req, res) => {
         } else {
             inventoryData.demandHistory = [];
         }
-        
+
         const inventory = new Inventory(inventoryData);
         await inventory.save();
-        
+
         res.redirect("/inventory/list");
     } catch (error) {
         console.error("Error adding inventory:", error);
@@ -440,20 +441,20 @@ app.post("/inventory/add/json", async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         const { products } = req.body;
-        
+
         if (!products || !Array.isArray(products) || products.length === 0) {
             return res.status(400).json({ error: "Invalid products array" });
         }
-        
+
         // Process each product
         const processedProducts = products.map(product => {
             const inventoryData = { ...product, userId };
-            
+
             // Ensure demandHistory is properly formatted
             if (product.demandHistory && Array.isArray(product.demandHistory)) {
                 inventoryData.demandHistory = product.demandHistory.map(entry => ({
@@ -463,23 +464,23 @@ app.post("/inventory/add/json", async (req, res) => {
             } else {
                 inventoryData.demandHistory = [];
             }
-            
+
             return inventoryData;
         });
-        
+
         // Insert all products
         const result = await Inventory.insertMany(processedProducts);
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             count: result.length,
-            message: `${result.length} product(s) added successfully` 
+            message: `${result.length} product(s) added successfully`
         });
     } catch (error) {
         console.error("Error adding products from JSON:", error);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "Failed to add products",
-            message: error.message 
+            message: error.message
         });
     }
 });
@@ -493,11 +494,11 @@ app.get("/inventory/list", (req, res) => {
 app.get("/inventory/edit/:id", async (req, res) => {
     try {
         const product = await Inventory.findById(req.params.id).lean();
-        
+
         if (!product) {
             return res.status(404).send("Product not found");
         }
-        
+
         res.render("edit", { product });
     } catch (error) {
         console.error("Error loading product for edit:", error);
@@ -509,7 +510,7 @@ app.get("/inventory/edit/:id", async (req, res) => {
 app.post("/inventory/edit/:id", async (req, res) => {
     try {
         const updateData = { ...req.body };
-        
+
         // Parse demand history if provided
         if (req.body.demandHistory && req.body.demandHistory.trim()) {
             const demandValues = req.body.demandHistory.split(',').map(v => v.trim());
@@ -520,9 +521,9 @@ app.post("/inventory/edit/:id", async (req, res) => {
         } else {
             updateData.demandHistory = [];
         }
-        
+
         await Inventory.findByIdAndUpdate(req.params.id, updateData);
-        
+
         res.redirect("/inventory/list");
     } catch (error) {
         console.error("Error updating inventory:", error);
@@ -534,11 +535,11 @@ app.post("/inventory/edit/:id", async (req, res) => {
 app.delete("/api/inventory/:id", async (req, res) => {
     try {
         const product = await Inventory.findByIdAndDelete(req.params.id);
-        
+
         if (!product) {
             return res.json({ success: false, message: "Product not found" });
         }
-        
+
         res.json({ success: true, message: "Product deleted successfully" });
     } catch (error) {
         console.error("Error deleting inventory:", error);
@@ -551,14 +552,14 @@ app.get("/management", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         // Get inventory data
         const inventory = await Inventory.find({ userId }).lean();
         const inventoryCount = inventory.length;
-        
+
         // Analyze inventory to detect issues
         const issues = {
             reduceWaste: false,
@@ -566,21 +567,21 @@ app.get("/management", async (req, res) => {
             changes: false,
             action: false
         };
-        
+
         let issueCount = 0;
-        
+
         // Check for issues in inventory
         inventory.forEach(item => {
             // Check for overstocked items (waste reduction needed)
             if (item.onHand > 60) {
                 issues.reduceWaste = true;
             }
-            
+
             // Check for low stock alerts
             if (item.onHand < 10) {
                 issues.alert = true;
             }
-            
+
             // Check for items with high demand variability (changes needed)
             if (item.demandHistory && item.demandHistory.length > 0) {
                 const demands = item.demandHistory.map(d => d.unitsSold);
@@ -590,29 +591,29 @@ app.get("/management", async (req, res) => {
                     issues.changes = true;
                 }
             }
-            
+
             // Check for items needing immediate action (critical stock or budget issues)
             if (item.onHand < 5 || (item.unitCost * item.moq > item.budgetCap)) {
                 issues.action = true;
             }
         });
-        
+
         // Count active issues
         issueCount = Object.values(issues).filter(Boolean).length;
-        
-        res.render("management", { 
+
+        res.render("management", {
             issues,
             issueCount,
             inventoryCount,
-            userId 
+            userId
         });
     } catch (error) {
         console.error("Error loading management center:", error);
-        res.render("management", { 
+        res.render("management", {
             issues: {},
             issueCount: 0,
             inventoryCount: 0,
-            userId 
+            userId
         });
     }
 });
@@ -622,16 +623,16 @@ app.get("/action", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         // Get all pending actions
-        const pendingActions = await Action.find({ 
-            userId, 
-            status: 'PENDING' 
+        const pendingActions = await Action.find({
+            userId,
+            status: 'PENDING'
         }).sort({ priority: -1, createdAt: -1 }).lean();
-        
+
         // Get action statistics
         const stats = {
             pending: await Action.countDocuments({ userId, status: 'PENDING' }),
@@ -639,22 +640,22 @@ app.get("/action", async (req, res) => {
             executed: await Action.countDocuments({ userId, status: 'EXECUTED' }),
             totalSavings: 0
         };
-        
+
         // Calculate total estimated savings from executed actions
         const executedActions = await Action.find({ userId, status: 'EXECUTED' }).lean();
         stats.totalSavings = executedActions.reduce((sum, action) => sum + (action.estimatedSavings || 0), 0);
-        
-        res.render("action", { 
+
+        res.render("action", {
             actions: pendingActions,
             stats,
-            userId 
+            userId
         });
     } catch (error) {
         console.error("Error loading actions:", error);
-        res.render("action", { 
+        res.render("action", {
             actions: [],
             stats: { pending: 0, approved: 0, executed: 0, totalSavings: 0 },
-            userId 
+            userId
         });
     }
 });
@@ -662,21 +663,21 @@ app.get("/action", async (req, res) => {
 // Generate AI action suggestions
 app.post("/api/actions/generate", async (req, res) => {
     const userId = req.session.userId || "user123";
-    
+
     try {
         // Get all inventory items
         const inventory = await Inventory.find({ userId }).lean();
-        
+
         const suggestions = [];
-        
+
         for (const product of inventory) {
             const demands = product.demandHistory?.map(d => d.unitsSold) || [];
-            const avgDemand = demands.length > 0 
-                ? demands.reduce((a, b) => a + b, 0) / demands.length 
+            const avgDemand = demands.length > 0
+                ? demands.reduce((a, b) => a + b, 0) / demands.length
                 : 0;
-            
+
             const daysOfCover = avgDemand > 0 ? product.onHand / avgDemand : 999;
-            
+
             // Critical: Less than 5 days of stock
             if (daysOfCover < 5 && product.onHand < product.safetyStockDays * avgDemand) {
                 suggestions.push({
@@ -775,14 +776,14 @@ app.post("/api/actions/generate", async (req, res) => {
                 });
             }
         }
-        
+
         // Save suggestions to database
         if (suggestions.length > 0) {
             await Action.insertMany(suggestions);
         }
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             count: suggestions.length,
             message: `Generated ${suggestions.length} AI-powered action suggestions`
         });
@@ -796,20 +797,20 @@ app.post("/api/actions/generate", async (req, res) => {
 app.post("/api/actions/approve/:id", async (req, res) => {
     try {
         const action = await Action.findById(req.params.id);
-        
+
         if (!action) {
             return res.json({ success: false, message: "Action not found" });
         }
-        
+
         action.status = 'APPROVED';
         action.approvedAt = new Date();
         action.approvedBy = req.session.userId || "system";
         action.notes = req.body.notes || '';
-        
+
         await action.save();
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: `Action approved: ${action.type} for ${action.productName}`
         });
     } catch (error) {
@@ -822,18 +823,18 @@ app.post("/api/actions/approve/:id", async (req, res) => {
 app.post("/api/actions/reject/:id", async (req, res) => {
     try {
         const action = await Action.findById(req.params.id);
-        
+
         if (!action) {
             return res.json({ success: false, message: "Action not found" });
         }
-        
+
         action.status = 'REJECTED';
         action.notes = req.body.notes || 'Rejected by user';
-        
+
         await action.save();
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: `Action rejected: ${action.type} for ${action.productName}`
         });
     } catch (error) {
@@ -846,22 +847,22 @@ app.post("/api/actions/reject/:id", async (req, res) => {
 app.post("/api/actions/execute/:id", async (req, res) => {
     try {
         const action = await Action.findById(req.params.id);
-        
+
         if (!action) {
             return res.json({ success: false, message: "Action not found" });
         }
-        
+
         if (action.status !== 'APPROVED') {
             return res.json({ success: false, message: "Action must be approved first" });
         }
-        
+
         action.status = 'EXECUTED';
         action.executedAt = new Date();
-        
+
         await action.save();
-        
-        res.json({ 
-            success: true, 
+
+        res.json({
+            success: true,
             message: `Action executed: ${action.type} for ${action.productName}`
         });
     } catch (error) {
@@ -875,31 +876,31 @@ app.get("/reduce-waste", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     const userId = req.session.userId;
-    
+
     try {
         // Find overstocked items
         const overstock = await Inventory.find({ userId, onHand: { $gt: 60 } }).lean();
-        
+
         if (overstock.length === 0) {
             return res.redirect("/");
         }
-        
+
         // Get the first overstocked product (or you could let user select)
         const product = overstock[0];
-        
+
         // Calculate average demand
         const demands = product.demandHistory?.map(d => d.unitsSold) || [];
-        const avgDemand = demands.length > 0 
-            ? demands.reduce((a, b) => a + b, 0) / demands.length 
+        const avgDemand = demands.length > 0
+            ? demands.reduce((a, b) => a + b, 0) / demands.length
             : 0;
-        
+
         // Calculate excess stock (anything above 30 days of supply is considered excess)
         // For low-velocity items, we use minimum threshold of 20 units
         const optimalStock = Math.max(20, Math.ceil(avgDemand * 30));
         const excessStock = Math.max(0, product.onHand - optimalStock);
-        
+
         // Warehouse definitions with zip codes
         const warehouseDefinitions = [
             {
@@ -948,12 +949,12 @@ app.get("/reduce-waste", async (req, res) => {
                 suggestedQty: Math.min(excessStock, Math.ceil(avgDemand * 50))
             }
         ];
-        
+
         // Get real shipping costs from ShipEngine API (with fallback to mock)
         const originZip = product.locationZip || '10001'; // Default to NYC if not set
         const warehouses = await Promise.all(warehouseDefinitions.map(async (wh) => {
             const realCost = await getShippingCosts(originZip, wh.zipCode);
-            
+
             // Use real cost if available, otherwise use intelligent mock based on distance
             const mockCosts = {
                 'WH-001': 45.50,  // Boston
@@ -962,17 +963,17 @@ app.get("/reduce-waste", async (req, res) => {
                 'WH-004': 65.90,  // Dallas
                 'WH-005': 78.40   // Los Angeles
             };
-            
+
             return {
                 ...wh,
                 transferCost: realCost || mockCosts[wh.id],
                 costSource: realCost ? 'shipengine' : 'estimated'
             };
         }));
-        
+
         // Sort warehouses by transfer cost (cheapest first)
         warehouses.sort((a, b) => a.transferCost - b.transferCost);
-        
+
         res.render("ReduceWaste", {
             product,
             avgDemand,
@@ -989,11 +990,11 @@ app.get("/reduce-waste", async (req, res) => {
 // API: AI-powered distribution recommendation
 app.post("/api/ai-distribute-recommendation", async (req, res) => {
     const { productSku, productName, excessStock, warehouses, userId } = req.body;
-    
+
     console.log('🤖 AI Distribution Request:', { productSku, productName, excessStock, warehouseCount: warehouses?.length });
-    
+
     const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
-    
+
     try {
         // Call Mastra AI agent with waste distribution tool
         console.log(`📡 Calling Mastra AI at ${mastraUrl}...`);
@@ -1013,30 +1014,30 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
                 resourceid: userId
             })
         });
-        
+
         if (!aiResponse.ok) {
             console.error('❌ Mastra AI error:', aiResponse.status, aiResponse.statusText);
             throw new Error('AI service unavailable');
         }
-        
+
         const aiData = await aiResponse.json();
         console.log('✅ AI Response received:', aiData.text?.substring(0, 100) + '...');
         const aiText = aiData.text || aiData.message || '';
-        
+
         // Parse AI response to extract distribution plan
         let recommendation;
-        
+
         // Try to extract structured data from AI response
-        const shouldDistribute = aiText.toLowerCase().includes('yes') || 
-                                 aiText.toLowerCase().includes('recommend') ||
-                                 aiText.toLowerCase().includes('distribute');
-        
+        const shouldDistribute = aiText.toLowerCase().includes('yes') ||
+            aiText.toLowerCase().includes('recommend') ||
+            aiText.toLowerCase().includes('distribute');
+
         if (shouldDistribute) {
             // Build distribution plan based on AI's analysis
             const distributions = [];
             let totalUnits = 0;
             let estimatedCost = 0;
-            
+
             // Prioritize high-demand, low-stock warehouses with low transfer costs
             const sortedWarehouses = [...warehouses]
                 .map(wh => ({
@@ -1044,21 +1045,21 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
                     priority: (parseFloat(wh.demand) / wh.currentStock) / wh.transferCost
                 }))
                 .sort((a, b) => b.priority - a.priority);
-            
+
             let remainingStock = excessStock;
-            
+
             for (const wh of sortedWarehouses) {
                 if (remainingStock <= 0) break;
-                
+
                 // Calculate optimal quantity for this warehouse
                 const demand = parseFloat(wh.demand);
                 const daysOfSupply = wh.currentStock / demand;
-                
+
                 // Only distribute if they have less than 30 days of supply
                 if (daysOfSupply < 30) {
                     const neededUnits = Math.ceil(demand * 30) - wh.currentStock;
                     const quantityToSend = Math.min(neededUnits, remainingStock, wh.suggestedQty);
-                    
+
                     if (quantityToSend > 0) {
                         distributions.push({
                             warehouseId: wh.id,
@@ -1067,17 +1068,17 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
                             quantity: quantityToSend,
                             reason: `High demand (${demand}/day), low stock (${daysOfSupply.toFixed(1)} days supply)`
                         });
-                        
+
                         totalUnits += quantityToSend;
                         estimatedCost += (wh.transferCost * quantityToSend / 100);
                         remainingStock -= quantityToSend;
                     }
                 }
             }
-            
+
             recommendation = {
                 shouldDistribute: distributions.length > 0,
-                decision: distributions.length > 0 
+                decision: distributions.length > 0
                     ? `✅ Yes, distribute ${totalUnits} units to ${distributions.length} warehouse(s)`
                     : '❌ No distribution recommended - all warehouses adequately stocked',
                 reasoning: aiText.substring(0, 300) + '...',
@@ -1095,17 +1096,17 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
                 estimatedCost: 0
             };
         }
-        
+
         res.json({ success: true, recommendation });
     } catch (error) {
         console.error("AI distribution recommendation error:", error);
-        
+
         // Fallback: Simple rule-based distribution
         const distributions = [];
         let totalUnits = 0;
         let estimatedCost = 0;
         let remainingStock = excessStock;
-        
+
         for (const wh of warehouses.slice(0, 3)) { // Top 3 lowest cost
             if (remainingStock <= 0) break;
             const qty = Math.min(wh.suggestedQty, remainingStock);
@@ -1122,7 +1123,7 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
                 remainingStock -= qty;
             }
         }
-        
+
         res.json({
             success: true,
             recommendation: {
@@ -1140,31 +1141,31 @@ Should I distribute this excess stock? If yes, which warehouses should receive h
 // API: Distribute stock to warehouses
 app.post("/api/distribute-stock", async (req, res) => {
     const { productSku, distributions, userId } = req.body;
-    
+
     try {
         // Get the product
         const product = await Inventory.findOne({ userId, sku: productSku });
-        
+
         if (!product) {
             return res.json({ success: false, error: 'Product not found' });
         }
-        
+
         // Calculate total distribution
         const totalDistributed = distributions.reduce((sum, d) => sum + d.quantity, 0);
-        
+
         if (totalDistributed > product.onHand) {
             return res.json({ success: false, error: 'Not enough stock to distribute' });
         }
-        
+
         // Update product stock
         product.onHand -= totalDistributed;
         await product.save();
-        
+
         // In a real system, you would also:
         // 1. Create transfer orders
         // 2. Update destination warehouse stocks
         // 3. Log the transaction
-        
+
         res.json({
             success: true,
             totalDistributed,
@@ -1182,13 +1183,13 @@ app.get("/alert", async (req, res) => {
     if (!req.session.userId) {
         return res.redirect("/signup");
     }
-    
+
     try {
         const userId = req.session.userId;
-        
+
         // Fetch inventory from MongoDB
         const inventory = await Inventory.find({ userId }).lean();
-        
+
         // Define warehouses (mock data)
         const warehouses = [
             {
@@ -1267,8 +1268,8 @@ app.get("/alert", async (req, res) => {
                 }))
             }
         ];
-        
-        res.render("Alert", { 
+
+        res.render("Alert", {
             warehouses,
             inventory
         });
@@ -1286,12 +1287,12 @@ app.get("/courses", (req, res) => {
 // API: Analyze disasters and show necessary products by warehouse
 app.post("/api/analyze-disaster", async (req, res) => {
     const { userId } = req.body;
-    
+
     try {
         console.log("Starting disaster analysis for user:", userId);
-        
+
         const inventory = await Inventory.find({ userId: req.session.userId || userId || 'user123' }).lean();
-        
+
         // Generate intelligent disaster analysis based on actual inventory data
         const disasters = [{
             type: "weather_delay",
@@ -1306,7 +1307,7 @@ app.post("/api/analyze-disaster", async (req, res) => {
             })),
             recommendations: "🚨 Increase buffer stock in unaffected regions by 40%. Activate Delhi-Bangalore alternate route. Monitor weather forecasts hourly. Pre-position emergency inventory."
         }];
-        
+
         if (inventory.length > 5) {
             disasters.push({
                 type: "fuel_shortage",
@@ -1322,12 +1323,12 @@ app.post("/api/analyze-disaster", async (req, res) => {
                 recommendations: "💰 Consolidate shipments to reduce fuel costs. Prioritize high-margin products. Consider rail/sea freight alternatives. Implement zone-based distribution."
             });
         }
-        
+
         console.log("Sending disaster response with", disasters.length, "disasters");
         res.json({ success: true, disasters });
     } catch (error) {
         console.error("Disaster analysis error:", error);
-        res.json({ 
+        res.json({
             success: true,
             disasters: [{
                 type: "supply_disruption",
@@ -1343,9 +1344,9 @@ app.post("/api/analyze-disaster", async (req, res) => {
 // API: Generate waste reduction plans using AI
 app.post("/api/generate-waste-plans", async (req, res) => {
     const { productSku, productName, excessStock, unitCost, userId } = req.body;
-    
+
     const mastraUrl = process.env.MASTRA_URL || 'http://localhost:4111';
-    
+
     try {
         // Call Mastra AI agent for plan generation
         const aiResponse = await fetch(`${mastraUrl}/api/agents/inventoryAgent/generate`, {
@@ -1363,14 +1364,14 @@ app.post("/api/generate-waste-plans", async (req, res) => {
                 resourceid: userId
             })
         });
-        
+
         if (!aiResponse.ok) {
             throw new Error('AI service unavailable');
         }
-        
+
         const aiData = await aiResponse.json();
         let plans;
-        
+
         // Try to parse AI response as JSON
         try {
             const aiText = aiData.text || aiData.message || '';
@@ -1379,7 +1380,7 @@ app.post("/api/generate-waste-plans", async (req, res) => {
         } catch (parseError) {
             plans = null;
         }
-        
+
         // Fallback to mock plans if AI parsing fails
         if (!plans) {
             plans = [
@@ -1415,7 +1416,7 @@ app.post("/api/generate-waste-plans", async (req, res) => {
                 }
             ];
         }
-        
+
         res.json({ success: true, plans });
     } catch (error) {
         console.error("Plan generation error:", error);
@@ -1449,14 +1450,14 @@ let warehouseTransfers = [];
 // API: Get excess stock available for transfer
 app.get("/api/warehouse-excess-stock", async (req, res) => {
     const userId = req.session.userId;
-    
+
     if (!userId) {
         return res.status(401).json({ error: "Unauthorized" });
     }
-    
+
     try {
         const inventory = await Inventory.find({ userId }).lean();
-        
+
         // Find items with excess stock (more than 30 days supply)
         const excessItems = inventory
             .filter(item => {
@@ -1471,7 +1472,7 @@ app.get("/api/warehouse-excess-stock", async (req, res) => {
                 warehouse: 'wh-boston' // Mock warehouse
             }))
             .slice(0, 10); // Limit to top 10
-        
+
         res.json({
             success: true,
             excessItems
@@ -1486,7 +1487,7 @@ app.get("/api/warehouse-excess-stock", async (req, res) => {
 app.post("/api/warehouse-request", async (req, res) => {
     try {
         const { product, quantity, requestingWarehouse, userId } = req.body;
-        
+
         const request = {
             id: `req-${Date.now()}`,
             product,
@@ -1496,9 +1497,9 @@ app.post("/api/warehouse-request", async (req, res) => {
             createdAt: new Date(),
             userId
         };
-        
+
         warehouseRequests.push(request);
-        
+
         res.json({
             success: true,
             message: 'Request created successfully',
@@ -1517,7 +1518,7 @@ app.get("/api/warehouse-requests", (req, res) => {
         const activeRequests = warehouseRequests
             .filter(req => req.status === 'pending')
             .slice(-10); // Last 10 requests
-        
+
         res.json({
             success: true,
             requests: activeRequests
@@ -1532,17 +1533,17 @@ app.get("/api/warehouse-requests", (req, res) => {
 app.post("/api/warehouse-request/:requestId/fulfill", (req, res) => {
     try {
         const { requestId } = req.params;
-        
+
         const request = warehouseRequests.find(r => r.id === requestId);
-        
+
         if (!request) {
             return res.status(404).json({ success: false, message: 'Request not found' });
         }
-        
+
         // Mark as fulfilled
         request.status = 'fulfilled';
         request.fulfilledAt = new Date();
-        
+
         // Create transfer record
         const transfer = {
             id: `transfer-${Date.now()}`,
@@ -1553,9 +1554,9 @@ app.post("/api/warehouse-request/:requestId/fulfill", (req, res) => {
             status: 'in-transit',
             date: new Date()
         };
-        
+
         warehouseTransfers.push(transfer);
-        
+
         res.json({
             success: true,
             message: 'Request fulfilled',
@@ -1571,14 +1572,14 @@ app.post("/api/warehouse-request/:requestId/fulfill", (req, res) => {
 app.post("/api/warehouse-transfer", async (req, res) => {
     try {
         const { sku, quantity, fromWarehouse, toWarehouse, userId } = req.body;
-        
+
         // Find the product
         const product = await Inventory.findOne({ sku, userId }).lean();
-        
+
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
-        
+
         const transfer = {
             id: `transfer-${Date.now()}`,
             product: product.productName,
@@ -1589,9 +1590,9 @@ app.post("/api/warehouse-transfer", async (req, res) => {
             status: 'in-transit',
             date: new Date()
         };
-        
+
         warehouseTransfers.push(transfer);
-        
+
         res.json({
             success: true,
             message: 'Transfer initiated',
@@ -1610,7 +1611,7 @@ app.get("/api/warehouse-transfers", (req, res) => {
         const recentTransfers = warehouseTransfers
             .slice(-20)
             .reverse(); // Most recent first
-        
+
         res.json({
             success: true,
             transfers: recentTransfers
@@ -1629,7 +1630,7 @@ app.get("/api/warehouse-transfers", (req, res) => {
 app.get("/api/agent-memory/query", async (req, res) => {
     try {
         const { userId, agentType, tags, outcome, limit = 10 } = req.query;
-        
+
         // Build query
         const query = {};
         if (userId) query.userId = userId;
@@ -1639,17 +1640,17 @@ app.get("/api/agent-memory/query", async (req, res) => {
             const tagArray = Array.isArray(tags) ? tags : tags.split(',');
             query.tags = { $in: tagArray };
         }
-        
+
         // Query memories, sorted by most recent
         const memories = await AgentMemory.find(query)
             .sort({ createdAt: -1 })
             .limit(parseInt(limit));
-        
+
         // Calculate summary stats
         const total = await AgentMemory.countDocuments(query);
         const successCount = memories.filter(m => m.outcome === 'success').length;
         const failureCount = memories.filter(m => m.outcome === 'failure').length;
-        
+
         res.json({
             success: true,
             memories: memories.map(m => ({
@@ -1692,7 +1693,7 @@ app.post("/api/agent-memory/store", async (req, res) => {
             learnings,
             tags
         } = req.body;
-        
+
         // Validate required fields
         if (!agentType || !decision || !context || !action || !outcome) {
             return res.status(400).json({
@@ -1700,7 +1701,7 @@ app.post("/api/agent-memory/store", async (req, res) => {
                 error: 'Missing required fields: agentType, decision, context, action, outcome'
             });
         }
-        
+
         // Create new memory
         const memory = new AgentMemory({
             userId,
@@ -1713,9 +1714,9 @@ app.post("/api/agent-memory/store", async (req, res) => {
             learnings: learnings || '',
             tags: tags || []
         });
-        
+
         await memory.save();
-        
+
         res.json({
             success: true,
             message: 'Memory stored successfully',
@@ -1738,7 +1739,7 @@ app.post("/api/agent-memory/store", async (req, res) => {
 app.get("/api/agent-memory/analyze", async (req, res) => {
     try {
         const { userId, agentType, timeRange = '30days' } = req.query;
-        
+
         // Calculate date range
         const now = new Date();
         const ranges = {
@@ -1749,15 +1750,15 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
         };
         const days = ranges[timeRange] || 30;
         const startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
-        
+
         // Build query
         const query = { createdAt: { $gte: startDate } };
         if (userId) query.userId = userId;
         if (agentType) query.agentType = agentType;
-        
+
         // Get all memories in range
         const memories = await AgentMemory.find(query).sort({ createdAt: -1 });
-        
+
         // Analyze patterns
         const analysis = {
             timeRange,
@@ -1768,7 +1769,7 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
                 partial: memories.filter(m => m.outcome === 'partial').length,
                 pending: memories.filter(m => m.outcome === 'pending').length
             },
-            successRate: memories.length > 0 
+            successRate: memories.length > 0
                 ? (memories.filter(m => m.outcome === 'success').length / memories.length * 100).toFixed(1)
                 : 0,
             commonTags: {},
@@ -1780,14 +1781,14 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
             successfulPatterns: [],
             failurePatterns: []
         };
-        
+
         // Calculate common tags
         memories.forEach(m => {
             m.tags.forEach(tag => {
                 analysis.commonTags[tag] = (analysis.commonTags[tag] || 0) + 1;
             });
         });
-        
+
         // Calculate average metrics
         let metricsCount = 0;
         let totalCost = 0, totalTime = 0, totalAccuracy = 0;
@@ -1806,7 +1807,7 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
             analysis.avgMetrics.timeElapsed = (totalTime / metricsCount).toFixed(2);
             analysis.avgMetrics.accuracy = (totalAccuracy / metricsCount).toFixed(1);
         }
-        
+
         // Extract successful patterns
         const successMemories = memories.filter(m => m.outcome === 'success');
         analysis.successfulPatterns = successMemories.slice(0, 5).map(m => ({
@@ -1816,7 +1817,7 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
             tags: m.tags,
             date: m.createdAt
         }));
-        
+
         // Extract failure patterns
         const failureMemories = memories.filter(m => m.outcome === 'failure');
         analysis.failurePatterns = failureMemories.slice(0, 5).map(m => ({
@@ -1826,7 +1827,7 @@ app.get("/api/agent-memory/analyze", async (req, res) => {
             tags: m.tags,
             date: m.createdAt
         }));
-        
+
         res.json({
             success: true,
             analysis

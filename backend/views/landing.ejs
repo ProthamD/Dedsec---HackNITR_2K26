@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventree - Smart Inventory Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #050505;
+            --accent-green: #22c55e;
+            --accent-green-hover: #16a34a;
+            --text-primary: rgba(255, 255, 255, 0.9);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Brand Font */
+        .brand-font {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Hero Canvas Section */
+        .hero-section {
+            position: relative;
+            height: 400vh;
+            background: var(--bg-dark);
+        }
+        
+        .hero-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #hero-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.4;
+        }
+        
+        /* Loader */
+        .loader-container {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loader-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(34, 197, 94, 0.2);
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Entrance Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Animated Elements */
+        .animate-slide-down {
+            animation: slideDown 0.8s ease-out forwards;
+        }
+        
+        .animate-fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
+        }
+        
+        .animate-scale-in {
+            opacity: 0;
+            animation: scaleIn 0.6s ease-out forwards;
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
+        .delay-800 { animation-delay: 0.8s; }
+        .delay-1000 { animation-delay: 1s; }
+        .delay-1200 { animation-delay: 1.2s; }
+        
+        /* Scroll-triggered animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal-left.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .reveal-right.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        /* Feature card stagger */
+        .feature-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .feature-card.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .feature-card:nth-child(1) { transition-delay: 0.1s; }
+        .feature-card:nth-child(2) { transition-delay: 0.2s; }
+        .feature-card:nth-child(3) { transition-delay: 0.3s; }
+        .feature-card:nth-child(4) { transition-delay: 0.4s; }
+        .feature-card:nth-child(5) { transition-delay: 0.5s; }
+        .feature-card:nth-child(6) { transition-delay: 0.6s; }
+        
+        /* Button hover pulse */
+        .btn-primary:hover {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* Glow animation enhancement */
+        .glow {
+            opacity: 0;
+            animation: fadeIn 2s ease-out 0.5s forwards;
+        }
+        
+        /* Text Overlays */
+        .text-overlay {
+            position: absolute;
+            z-index: 10;
+            opacity: 0;
+            transform: translateY(30px);
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8), 0 4px 40px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            pointer-events: none;
+        }
+        
+        .text-overlay.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .text-center-overlay {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 90%;
+            max-width: 700px;
+        }
+        
+        .text-center-overlay.visible {
+            transform: translate(-50%, -50%);
+        }
+        
+        .text-left-overlay {
+            top: 50%;
+            left: 8%;
+            transform: translateY(-50%);
+            text-align: left;
+            max-width: 400px;
+        }
+        
+        .text-left-overlay.visible {
+            transform: translateY(-50%) translateY(0);
+        }
+        
+        .text-right-overlay {
+            top: 50%;
+            right: 8%;
+            transform: translateY(-50%);
+            text-align: right;
+            max-width: 400px;
+        }
+        
+        .text-right-overlay.visible {
+            transform: translateY(-50%) translateY(0);
+        }
+        
+        /* Navigation */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 1rem 2rem;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            animation: slideDown 0.8s ease-out forwards;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-green);
+        }
+        
+        .logo-accent {
+            color: var(--accent-green);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--accent-green);
+            color: #fff;
+            border: none;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-green-hover);
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-large {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Hero Text Styles */
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+        
+        .section-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .section-text {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        /* Features Section */
+        .features-section {
+            background: var(--bg-dark);
+            padding: 8rem 2rem;
+            position: relative;
+        }
+        
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .features-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(34, 197, 94, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .feature-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke-width: 1.5;
+        }
+        
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feature-text {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        /* Footer Icon */
+        .footer-heart {
+            display: inline;
+            width: 16px;
+            height: 16px;
+            color: #ef4444;
+            fill: #ef4444;
+            vertical-align: middle;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(34, 197, 94, 0.05) 100%);
+            padding: 8rem 2rem;
+            text-align: center;
+        }
+        
+        .cta-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .text-left-overlay,
+            .text-right-overlay {
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                width: 90%;
+            }
+            
+            .text-left-overlay.visible,
+            .text-right-overlay.visible {
+                transform: translate(-50%, -50%);
+            }
+            
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* Glow effect */
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .glow-1 {
+            top: 20%;
+            left: 10%;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .glow-2 {
+            bottom: 20%;
+            right: 10%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader-container" id="loader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i data-feather="package" class="logo-icon"></i>
+                <span class="brand-font">Inven<span class="logo-accent">tree</span></span>
+            </a>
+            <div class="nav-buttons">
+                <a href="#features" class="btn btn-secondary">Features</a>
+                <a href="/signin" class="btn btn-secondary">Log In</a>
+                <a href="/signup" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Scroll Animation -->
+    <section class="hero-section" id="hero-section">
+        <div class="hero-sticky">
+            <!-- Glow Effects -->
+            <div class="glow glow-1"></div>
+            <div class="glow glow-2"></div>
+            
+            <!-- Canvas for Frame Animation -->
+            <canvas id="hero-canvas" width="800" height="800"></canvas>
+            
+            <!-- Text Overlays -->
+            <div class="text-overlay text-center-overlay" id="text-intro">
+                <h1 class="hero-title">
+                    Welcome to <span class="brand-font"><span class="logo-accent">Inven</span><span class="logo-accent">tree</span></span>
+                </h1>
+                <p class="hero-subtitle">
+                    <span class="logo-accent">Effortless</span> Inventory. <span class="logo-accent">Smarter</span> Management.<br>
+                    AI-powered insights for your business.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/signup" class="btn btn-primary btn-large">Get Started Free</a>
+                    <a href="/signin" class="btn btn-secondary btn-large">Log In</a>
+                </div>
+            </div>
+            
+            <div class="text-overlay text-left-overlay" id="text-precision">
+                <h2 class="section-title"><span class="logo-accent">Precision</span> Tracking</h2>
+                <p class="section-text">
+                    Real-time inventory monitoring with <span class="logo-accent">intelligent alerts</span>. 
+                    Never run out of stock or overorder again.
+                </p>
+            </div>
+            
+            <div class="text-overlay text-right-overlay" id="text-ai">
+                <h2 class="section-title"><span class="logo-accent">AI-Powered</span> Insights</h2>
+                <p class="section-text">
+                    Our smart assistant analyzes patterns, predicts demand, 
+                    and helps you make data-driven decisions.
+                </p>
+            </div>
+            
+            <div class="text-overlay text-center-overlay" id="text-cta">
+                <h2 class="section-title">Ready to <span class="logo-accent">Transform</span> Your Business?</h2>
+                <p class="section-text" style="margin-bottom: 2rem;">
+                    Join thousands of businesses already using <span class="logo-accent">Inven</span><span class="logo-accent">tree</span>.
+                </p>
+                <a href="/signup" class="btn btn-primary btn-large">Start Your Journey →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="features-container">
+            <div class="features-header reveal">
+                <h2 class="hero-title" style="font-size: clamp(2rem, 5vw, 3rem);">
+                    Everything <span class="logo-accent">You</span> Need
+                </h2>
+                <p class="hero-subtitle">
+                    Powerful features to streamline your <span class="logo-accent">inventory management</span>
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="bar-chart-2"></i></div>
+                    <h3 class="feature-title">Real-Time Analytics</h3>
+                    <p class="feature-text">
+                        Track stock levels, sales trends, and performance metrics in real-time with beautiful dashboards.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="cpu"></i></div>
+                    <h3 class="feature-title">AI Assistant</h3>
+                    <p class="feature-text">
+                        Chat with our intelligent assistant to get insights, manage stock, and automate routine tasks.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="zap"></i></div>
+                    <h3 class="feature-title">Smart Alerts</h3>
+                    <p class="feature-text">
+                        Get notified about low stock, expiring items, and optimization opportunities automatically.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="grid"></i></div>
+                    <h3 class="feature-title">Multi-Warehouse</h3>
+                    <p class="feature-text">
+                        Manage inventory across multiple locations with seamless transfers and unified tracking.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="refresh-cw"></i></div>
+                    <h3 class="feature-title">Waste Reduction</h3>
+                    <p class="feature-text">
+                        Identify overstocked items and reduce waste with intelligent recommendations.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon"><i data-feather="shield"></i></div>
+                    <h3 class="feature-title">Secure & Reliable</h3>
+                    <p class="feature-text">
+                        Enterprise-grade security with encrypted data and 99.9% uptime guarantee.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container reveal">
+            <h2 class="hero-title" style="font-size: clamp(2rem, 5vw, 3rem);">
+                Start Managing <span class="logo-accent">Smarter</span>
+            </h2>
+            <p class="hero-subtitle">
+                Join <span class="brand-font">Inven<span class="logo-accent">tree</span></span> today and experience the future of inventory management.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="/signup" class="btn btn-primary btn-large">Get Started Free</a>
+                <a href="/signin" class="btn btn-secondary btn-large">Log In</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer reveal">
+        <p class="footer-text">
+            © 2026 <span class="brand-font">Inven<span class="logo-accent">tree</span></span>. Built with <i data-feather="heart" class="footer-heart"></i> for smarter inventory management.
+        </p>
+    </footer>
+
+    <script>
+        // Frame animation configuration
+        const frameCount = 128;
+        const images = [];
+        let loadedCount = 0;
+        let currentFrame = 0;
+        
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        const loader = document.getElementById('loader');
+        
+        // Text overlays
+        const textIntro = document.getElementById('text-intro');
+        const textPrecision = document.getElementById('text-precision');
+        const textAi = document.getElementById('text-ai');
+        const textCta = document.getElementById('text-cta');
+        
+        // Pad number with leading zeros
+        function pad(num, size = 3) {
+            return num.toString().padStart(size, '0');
+        }
+        
+        // Preload all images
+        function preloadImages() {
+            for (let i = 1; i <= frameCount; i++) {
+                const img = new Image();
+                img.src = `/images/ezgif-1790edb1151f001e-jpg/ezgif-frame-${pad(i)}.jpg`;
+                img.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === frameCount) {
+                        // All images loaded
+                        loader.classList.add('hidden');
+                        resizeCanvas();
+                        drawFrame(0);
+                        textIntro.classList.add('visible');
+                    }
+                };
+                img.onerror = () => {
+                    loadedCount++;
+                    console.warn(`Failed to load frame ${i}`);
+                };
+                images.push(img);
+            }
+        }
+        
+        // Resize canvas to fill viewport
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            // Redraw current frame after resize
+            if (images[currentFrame]) {
+                drawFrame(currentFrame);
+            }
+        }
+        
+        // Draw a specific frame (cover the canvas, maintaining aspect ratio)
+        function drawFrame(frameIndex) {
+            if (images[frameIndex] && images[frameIndex].complete) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const img = images[frameIndex];
+                const imgRatio = img.width / img.height;
+                const canvasRatio = canvas.width / canvas.height;
+                
+                let drawWidth, drawHeight, offsetX, offsetY;
+                
+                if (imgRatio > canvasRatio) {
+                    // Image is wider - fit by height
+                    drawHeight = canvas.height;
+                    drawWidth = drawHeight * imgRatio;
+                    offsetX = (canvas.width - drawWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // Image is taller - fit by width
+                    drawWidth = canvas.width;
+                    drawHeight = drawWidth / imgRatio;
+                    offsetX = 0;
+                    offsetY = (canvas.height - drawHeight) / 2;
+                }
+                
+                ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            }
+        }
+        
+        // Handle scroll animation
+        function onScroll() {
+            const section = document.getElementById('hero-section');
+            const rect = section.getBoundingClientRect();
+            const scrollTop = -rect.top;
+            const scrollHeight = section.offsetHeight - window.innerHeight;
+            const progress = Math.max(0, Math.min(1, scrollTop / scrollHeight));
+            
+            // Map progress to frame index
+            const frameIndex = Math.floor(progress * (frameCount - 1));
+            
+            if (frameIndex !== currentFrame && images[frameIndex]) {
+                currentFrame = frameIndex;
+                drawFrame(currentFrame);
+            }
+            
+            // Update text overlays based on scroll progress
+            updateTextOverlays(progress);
+        }
+        
+        function updateTextOverlays(progress) {
+            // Reset all
+            textIntro.classList.remove('visible');
+            textPrecision.classList.remove('visible');
+            textAi.classList.remove('visible');
+            textCta.classList.remove('visible');
+            
+            // Show appropriate text based on progress
+            if (progress < 0.15) {
+                textIntro.classList.add('visible');
+            } else if (progress >= 0.2 && progress < 0.45) {
+                textPrecision.classList.add('visible');
+            } else if (progress >= 0.5 && progress < 0.75) {
+                textAi.classList.add('visible');
+            } else if (progress >= 0.8) {
+                textCta.classList.add('visible');
+            }
+        }
+        
+        // Scroll reveal animation for elements
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .feature-card');
+            const windowHeight = window.innerHeight;
+            
+            reveals.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const revealPoint = 150;
+                
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            preloadImages();
+            window.addEventListener('scroll', onScroll);
+            window.addEventListener('scroll', revealOnScroll);
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Trigger initial reveal check
+            setTimeout(revealOnScroll, 100);
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+        
+        // Initialize Feather Icons
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    </script>
+</body>
+</html>
